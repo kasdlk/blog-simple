@@ -1,0 +1,125 @@
+import Database from 'better-sqlite3';
+import path from 'path';
+import { existsSync, mkdirSync } from 'fs';
+
+const dbDir = path.join(process.cwd(), 'data');
+const dbPath = path.join(dbDir, 'blog.db');
+
+// Ensure data directory exists
+if (!existsSync(dbDir)) {
+  mkdirSync(dbDir, { recursive: true });
+}
+
+const db = new Database(dbPath);
+
+// Initialize tables
+db.exec(`
+  CREATE TABLE IF NOT EXISTS posts (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    category TEXT DEFAULT '',
+    views INTEGER DEFAULT 0,
+    createdAt TEXT NOT NULL,
+    updatedAt TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS comments (
+    id TEXT PRIMARY KEY,
+    postId TEXT NOT NULL,
+    content TEXT NOT NULL,
+    floor INTEGER NOT NULL,
+    deviceId TEXT NOT NULL,
+    createdAt TEXT NOT NULL,
+    FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS likes (
+    postId TEXT NOT NULL,
+    deviceId TEXT NOT NULL,
+    createdAt TEXT NOT NULL,
+    PRIMARY KEY (postId, deviceId),
+    FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS admin (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    passwordHash TEXT NOT NULL,
+    createdAt TEXT NOT NULL,
+    updatedAt TEXT NOT NULL
+  );
+`);
+
+// Add category column if it doesn't exist (migration)
+try {
+  db.prepare('SELECT category FROM posts LIMIT 1').get();
+} catch {
+  db.exec('ALTER TABLE posts ADD COLUMN category TEXT DEFAULT ""');
+}
+
+// Add views column if it doesn't exist (migration)
+try {
+  db.prepare('SELECT views FROM posts LIMIT 1').get();
+} catch {
+  db.exec('ALTER TABLE posts ADD COLUMN views INTEGER DEFAULT 0');
+}
+
+// Add floor and deviceId columns to comments if they don't exist (migration)
+try {
+  db.prepare('SELECT floor FROM comments LIMIT 1').get();
+} catch {
+  db.exec('ALTER TABLE comments ADD COLUMN floor INTEGER DEFAULT 1');
+  db.exec('ALTER TABLE comments ADD COLUMN deviceId TEXT DEFAULT ""');
+  // Update existing comments with floor numbers
+  const comments = db.prepare('SELECT id, postId FROM comments ORDER BY createdAt ASC').all() as Array<{ id: string; postId: string }>;
+  const floorMap = new Map<string, number>();
+  for (const comment of comments) {
+    const currentFloor = (floorMap.get(comment.postId) || 0) + 1;
+    floorMap.set(comment.postId, currentFloor);
+    db.prepare('UPDATE comments SET floor = ? WHERE id = ?').run(currentFloor, comment.id);
+  }
+}
+
+// Insert default settings if not exists
+const defaultSettings = [
+  { key: 'blogTitle', value: 'Blog' },
+  { key: 'authorName', value: '' },
+  { key: 'authorBio', value: '' },
+  { key: 'authorEmail', value: '' },
+  { key: 'authorAvatar', value: '' },
+  { key: 'language', value: 'en' },
+  { key: 'enableComments', value: 'true' },
+  { key: 'enableLikes', value: 'true' },
+  { key: 'enableViews', value: 'true' },
+  { key: 'blogSubtitle', value: '' },
+];
+
+for (const setting of defaultSettings) {
+  const existing = db.prepare('SELECT * FROM settings WHERE key = ?').get(setting.key);
+  if (!existing) {
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run(setting.key, setting.value);
+  }
+}
+
+// Initialize default admin account if not exists
+// Default password: 123456 (SHA256 hash)
+const defaultPasswordHash = '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92';
+const adminExists = db.prepare('SELECT * FROM admin LIMIT 1').get();
+if (!adminExists) {
+  const now = new Date().toISOString();
+  db.prepare('INSERT INTO admin (username, passwordHash, createdAt, updatedAt) VALUES (?, ?, ?, ?)').run(
+    'admin',
+    defaultPasswordHash,
+    now,
+    now
+  );
+}
+
+export default db;
+

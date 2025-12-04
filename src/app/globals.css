@@ -1,26 +1,236 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+@theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Enable dark mode with class strategy */
+.dark {
+  color-scheme: dark;
+}
+
+.light {
+  color-scheme: light;
+}
+
+html {
+  background-color: white;
+  color: black;
+}
+
+html.dark {
+  background-color: black;
+  color: white;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  background-color: inherit;
+  color: inherit;
+}
+
+/* Force dark mode styles when .dark class is present */
+.dark .bg-white {
+  background-color: black !important;
+}
+
+.dark .bg-black {
+  background-color: black !important;
+}
+
+.dark .text-black {
+  color: white !important;
+}
+
+.dark .text-white {
+  color: white !important;
+}
+
+.dark .text-gray-600 {
+  color: rgb(156 163 175) !important;
+}
+
+.dark .text-gray-400 {
+  color: rgb(156 163 175) !important;
+}
+
+.dark .text-gray-500 {
+  color: rgb(156 163 175) !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: rgb(31 41 55) !important;
+}
+
+.dark .bg-gray-800 {
+  background-color: rgb(31 41 55) !important;
+}
+
+.dark .bg-gray-900 {
+  background-color: rgb(17 24 39) !important;
+}
+
+.dark .border-gray-200 {
+  border-color: rgb(31 41 55) !important;
+}
+
+.dark .border-gray-300 {
+  border-color: rgb(55 65 81) !important;
+}
+
+.dark .border-gray-700 {
+  border-color: rgb(55 65 81) !important;
+}
+
+.dark .border-gray-800 {
+  border-color: rgb(31 41 55) !important;
+}
+
+.dark .hover\:bg-gray-50:hover {
+  background-color: rgb(17 24 39) !important;
+}
+
+.dark .hover\:bg-gray-900:hover {
+  background-color: rgb(17 24 39) !important;
+}
+
+.dark .hover\:text-black:hover {
+  color: white !important;
+}
+
+.dark .hover\:text-white:hover {
+  color: white !important;
+}
+
+/* Code highlight styles */
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  background: #f5f5f5;
+  color: #333;
+}
+
+.dark .hljs {
+  background: #1a1a1a;
+  color: #e0e0e0;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #6a737d;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-type {
+  color: #d73a49;
+}
+
+.dark .hljs-keyword,
+.dark .hljs-selector-tag,
+.dark .hljs-type {
+  color: #ff7b72;
+}
+
+.hljs-string,
+.hljs-literal,
+.hljs-number {
+  color: #032f62;
+}
+
+.dark .hljs-string,
+.dark .hljs-literal,
+.dark .hljs-number {
+  color: #a5d6ff;
+}
+
+.hljs-title,
+.hljs-section {
+  color: #6f42c1;
+}
+
+.dark .hljs-title,
+.dark .hljs-section {
+  color: #d2a8ff;
+}
+
+.hljs-function,
+.hljs-params {
+  color: #e36209;
+}
+
+.dark .hljs-function,
+.dark .hljs-params {
+  color: #ffa657;
+}
+
+.hljs-variable,
+.hljs-template-variable {
+  color: #e36209;
+}
+
+.dark .hljs-variable,
+.dark .hljs-template-variable {
+  color: #ffa657;
+}
+
+.hljs-attr,
+.hljs-attribute {
+  color: #005cc5;
+}
+
+.dark .hljs-attr,
+.dark .hljs-attribute {
+  color: #79c0ff;
+}
+
+.hljs-regexp,
+.hljs-link {
+  color: #032f62;
+}
+
+.dark .hljs-regexp,
+.dark .hljs-link {
+  color: #a5d6ff;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #005cc5;
+}
+
+.dark .hljs-built_in,
+.dark .hljs-builtin-name {
+  color: #79c0ff;
+}
+
+.hljs-meta {
+  color: #6a737d;
+}
+
+.hljs-deletion {
+  background: #ffeef0;
+}
+
+.dark .hljs-deletion {
+  background: #490202;
+}
+
+.hljs-addition {
+  background: #e6ffed;
+}
+
+.dark .hljs-addition {
+  background: #033a16;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
 }
