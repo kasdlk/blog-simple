@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { extractPlainText } from '@/lib/markdown';
 import { getTranslations, type Language } from '@/lib/i18n';
@@ -44,7 +45,19 @@ export default function InfiniteScroll({
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialPosts.length < total);
   const observerTarget = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
   const t = getTranslations(language);
+
+  // Get current category from URL to detect changes
+  const currentCategoryFromUrl = searchParams.get('category') || undefined;
+
+  // Reset posts when category changes (detected from URL) or when initialPosts update
+  useEffect(() => {
+    setPosts(initialPosts);
+    setPage(initialPage);
+    setHasMore(initialPosts.length < total);
+    setLoading(false);
+  }, [currentCategoryFromUrl, initialPosts, initialPage, total]);
 
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
