@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { extractPlainText } from '@/lib/markdown';
 import { getTranslations, type Language } from '@/lib/i18n';
+import { formatDate } from '@/lib/utils';
 import PostStats from '@/components/PostStats';
 
 interface Post {
@@ -12,6 +13,7 @@ interface Post {
   content: string;
   category: string;
   createdAt: string;
+  formattedDate?: string; // Server-formatted date to avoid hydration mismatch
 }
 
 interface InfiniteScrollProps {
@@ -62,8 +64,13 @@ export default function InfiniteScroll({
       if (res.ok) {
         const data = await res.json();
         if (data.posts && data.posts.length > 0) {
+          // Format dates for newly loaded posts to ensure consistency
+          const formattedPosts = data.posts.map((post: Post) => ({
+            ...post,
+            formattedDate: formatDate(post.createdAt, language),
+          }));
           setPosts((prev) => {
-            const newPosts = [...prev, ...data.posts];
+            const newPosts = [...prev, ...formattedPosts];
             setHasMore(newPosts.length < data.total);
             return newPosts;
           });
@@ -139,8 +146,8 @@ export default function InfiniteScroll({
               </div>
             )}
             <div className="flex items-center justify-between">
-              <time className="text-xs text-gray-400 dark:text-gray-600">
-                {new Date(post.createdAt).toLocaleDateString(language === 'zh' ? 'zh-CN' : 'en-US', {
+              <time className="text-xs text-gray-400 dark:text-gray-600" suppressHydrationWarning>
+                {post.formattedDate || new Date(post.createdAt).toLocaleDateString(language === 'zh' ? 'zh-CN' : 'en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',

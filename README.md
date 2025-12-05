@@ -50,9 +50,9 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3388](http://localhost:3388) in your browser.
 
-在浏览器中打开 [http://localhost:3000](http://localhost:3000)。
+在浏览器中打开 [http://localhost:3388](http://localhost:3388)。
 
 ### Build for Production / 构建生产版本
 

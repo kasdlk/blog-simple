@@ -1,6 +1,7 @@
 import { getPosts, getCategories } from '@/lib/posts';
 import { getSettings } from '@/lib/settings';
 import { getTranslations, type Language } from '@/lib/i18n';
+import { formatDate } from '@/lib/utils';
 import ThemeToggle from '@/components/ThemeToggle';
 import CategoryMenu, { CategorySidebar } from '@/components/CategoryMenu';
 import SearchBox from '@/components/SearchBox';
@@ -26,6 +27,12 @@ export default async function Home({ searchParams }: HomeProps) {
   const totalPages = Math.ceil(data.total / pageSize);
   const lang = (settings.language || 'en') as Language;
   const t = getTranslations(lang);
+
+  // Format dates on server side to avoid hydration mismatch
+  const postsWithFormattedDates = data.posts.map(post => ({
+    ...post,
+    formattedDate: formatDate(post.createdAt, lang),
+  }));
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
@@ -72,7 +79,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
             <main>
               <InfiniteScroll
-                initialPosts={data.posts}
+                initialPosts={postsWithFormattedDates}
                 initialPage={page}
                 total={data.total}
                 category={category || undefined}

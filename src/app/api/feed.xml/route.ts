@@ -55,3 +55,4 @@ function escapeXml(unsafe: string): string {
     .replace(/'/g, '&apos;');
 }
 
+
