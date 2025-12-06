@@ -10,6 +10,9 @@
 !.yarn/releases
 !.yarn/versions
 
+.idea
+blog.zip
+
 # testing
 /coverage
 
