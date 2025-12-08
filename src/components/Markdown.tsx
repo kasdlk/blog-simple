@@ -79,7 +79,7 @@ export default function Markdown({ content }: MarkdownProps) {
           ),
           th: (props) => (
             <th
-              className="border border-gray-300 dark:border-gray-700 px-4 py-2 bg-gray-50 dark:bg-gray-900 text-left text-black dark:text-white"
+              className="border border-gray-300 dark:border-gray-700 px-4 py-2 bg-gray-50 dark:!bg-[#262121] text-left text-black dark:text-white"
               {...props}
             />
           ),

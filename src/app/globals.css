@@ -71,6 +71,18 @@ body {
   background-color: rgb(17 24 39) !important;
 }
 
+/* 表头在暗色模式下的背景色 - 覆盖 bg-gray-50 */
+.dark .bg-gray-50 {
+  background-color: #262121 !important;
+}
+
+/* 特别针对表头，确保优先级 */
+.dark table th.bg-gray-50,
+.dark thead th,
+.dark th.bg-gray-50 {
+  background-color: #262121 !important;
+}
+
 .dark .border-gray-200 {
   border-color: rgb(31 41 55) !important;
 }
