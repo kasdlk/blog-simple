@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { extractPlainText } from '@/lib/markdown';
 import Markdown from '@/components/Markdown';
@@ -72,15 +71,12 @@ export default function AdminPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswordFields, setShowPasswordFields] = useState(false);
   
-  const router = useRouter();
   const lang = (settings.language || 'en') as Language;
   const t = getTranslations(lang);
   
   const showAlert = (message: string) => {
     setModal({ isOpen: true, message });
   };
-
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
   useEffect(() => {
     checkAuth();
@@ -96,9 +92,15 @@ export default function AdminPage() {
 
   const checkAuth = async () => {
     try {
-      const res = await fetch('/api/auth/login');
-      const data = await res.json();
-      setAuthenticated(data.authenticated || false);
+      const res = await fetch('/api/auth/login', {
+        cache: 'no-store',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAuthenticated(data.authenticated || false);
+      } else {
+        setAuthenticated(false);
+      }
     } catch (error) {
       console.error('Auth check failed:', error);
       setAuthenticated(false);
@@ -107,7 +109,7 @@ export default function AdminPage() {
 
   const fetchAdminCredentials = async () => {
     try {
-      const res = await fetch(`${baseUrl}/api/admin/credentials`);
+      const res = await fetch('/api/admin/credentials');
       if (res.ok) {
         const data = await res.json();
         setAdminUsername(data.username || '');
@@ -148,7 +150,7 @@ export default function AdminPage() {
     }
 
     try {
-      const res = await fetch(`${baseUrl}/api/admin/credentials`, {
+      const res = await fetch('/api/admin/credentials', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -181,14 +183,17 @@ export default function AdminPage() {
 
   const fetchPosts = async () => {
     try {
-      const res = await fetch(`${baseUrl}/api/posts`);
+      const res = await fetch('/api/posts');
       if (res.ok) {
         const data = await res.json();
         setPosts(data);
         setFilteredPosts(data);
+      } else {
+        console.error('Failed to fetch posts:', res.statusText);
       }
     } catch (error) {
       console.error('Failed to fetch posts:', error);
+      showAlert('Failed to load posts. Please refresh the page.');
     } finally {
       setLoading(false);
     }
@@ -202,10 +207,12 @@ export default function AdminPage() {
     }
     
     try {
-      const res = await fetch(`${baseUrl}/api/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
       if (res.ok) {
         const data = await res.json();
         setFilteredPosts(data.posts || []);
+      } else {
+        setFilteredPosts([]);
       }
     } catch (error) {
       console.error('Search failed:', error);
@@ -221,10 +228,12 @@ export default function AdminPage() {
 
   const fetchSettings = async () => {
     try {
-      const res = await fetch(`${baseUrl}/api/settings`);
+      const res = await fetch('/api/settings');
       if (res.ok) {
         const data = await res.json();
         setSettings(data);
+      } else {
+        console.error('Failed to fetch settings:', res.statusText);
       }
     } catch (error) {
       console.error('Failed to fetch settings:', error);
@@ -241,8 +250,8 @@ export default function AdminPage() {
 
     try {
       const url = editingPost 
-        ? `${baseUrl}/api/posts/${editingPost.id}`
-        : `${baseUrl}/api/posts`;
+        ? `/api/posts/${editingPost.id}`
+        : '/api/posts';
       
       const method = editingPost ? 'PUT' : 'POST';
       
@@ -269,7 +278,7 @@ export default function AdminPage() {
   const handleSettingsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${baseUrl}/api/settings`, {
+      const res = await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
@@ -301,7 +310,7 @@ export default function AdminPage() {
     if (!deleteModal.postId) return;
 
     try {
-      const res = await fetch(`${baseUrl}/api/posts/${deleteModal.postId}`, {
+      const res = await fetch(`/api/posts/${deleteModal.postId}`, {
         method: 'DELETE',
       });
 
