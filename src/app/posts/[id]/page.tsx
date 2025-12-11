@@ -35,7 +35,7 @@ export default async function PostPage({
               href="/" 
               className="text-sm text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors inline-block"
             >
-              ← {t.back}
+              &lt; {t.back}
             </Link>
             <ThemeToggle language={lang} />
           </div>

@@ -23,13 +23,22 @@ export default function ConfirmModal({
 }: ConfirmModalProps) {
   useEffect(() => {
     if (isOpen) {
+      // Calculate scrollbar width to prevent layout shift
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      // Save original padding-right if it exists
+      const originalPaddingRight = document.body.style.paddingRight;
+      // Set overflow hidden and compensate for scrollbar width
       document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
+      
+      return () => {
+        // Cleanup: restore original styles when modal closes
+        document.body.style.overflow = 'unset';
+        document.body.style.paddingRight = originalPaddingRight || '';
+      };
     }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -76,6 +85,9 @@ export default function ConfirmModal({
     </div>
   );
 }
+
+
+
 
 
 

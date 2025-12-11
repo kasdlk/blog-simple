@@ -59,10 +59,8 @@ export default async function Home({ searchParams }: HomeProps) {
                   </p>
                 )}
               </div>
-              <div className="flex justify-between items-start mb-6 gap-4">
-                <div className="flex-1 max-w-xs">
-                  <SearchBox language={lang} />
-                </div>
+              <div className="flex justify-between items-center mb-6 gap-4">
+                <SearchBox language={lang} />
                 <ThemeToggle language={lang} />
               </div>
             </header>
