@@ -46,6 +46,20 @@ export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Remove antialiased class from body for admin page
+  useEffect(() => {
+    document.body.classList.remove('antialiased');
+    document.body.style.setProperty('-webkit-font-smoothing', 'auto');
+    document.body.style.setProperty('-moz-osx-font-smoothing', 'auto');
+    
+    return () => {
+      // Restore on unmount if needed
+      document.body.classList.add('antialiased');
+      document.body.style.removeProperty('-webkit-font-smoothing');
+      document.body.style.removeProperty('-moz-osx-font-smoothing');
+    };
+  }, []);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
