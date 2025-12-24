@@ -23,7 +23,18 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const { content, deviceId } = await request.json();
+    
+    // Validate post ID
+    if (!id || typeof id !== 'string' || id.trim().length === 0) {
+      return NextResponse.json({ error: 'Invalid post ID' }, { status: 400 });
+    }
+    
+    const body = await request.json();
+    const { content, deviceId } = body;
+    
+    if (!content || !deviceId) {
+      return NextResponse.json({ error: 'Content and device ID are required' }, { status: 400 });
+    }
 
     // Validate comment content
     const commentValidation = validateComment(content);

@@ -28,37 +28,38 @@ export default async function PostPage({
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
-      <div className="max-w-2xl mx-auto px-6 py-16">
-        <header className="mb-12">
-          <div className="flex justify-between items-start mb-6">
+      <div className="max-w-3xl mx-auto px-6 sm:px-8 py-12 sm:py-16 lg:py-20">
+        <header className="mb-12 sm:mb-16">
+          <div className="flex justify-between items-start mb-8">
             <Link 
               href="/" 
-              className="text-sm text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors inline-block"
+              className="text-sm font-light text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-all duration-300 inline-flex items-center gap-1.5 hover:translate-x-[-2px] group"
             >
-              &lt; {t.back}
+              <span className="transition-transform duration-300 group-hover:translate-x-[-2px]">←</span>
+              <span>{t.back}</span>
             </Link>
             <ThemeToggle language={lang} />
           </div>
-          <h1 className="text-4xl font-light text-black dark:text-white mb-6">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light text-black dark:text-white mb-8 leading-tight tracking-tight">
             {post.title}
           </h1>
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-200 dark:border-gray-800">
             {settings.authorAvatar && (
               <Image
                 src={settings.authorAvatar}
                 alt={settings.authorName || 'Author'}
-                width={32}
-                height={32}
-                className="rounded-full object-cover"
+                width={40}
+                height={40}
+                className="rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-800"
               />
             )}
             <div className="flex flex-col">
               {settings.authorName && (
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="text-sm font-light text-gray-800 dark:text-gray-200 mb-1">
                   {settings.authorName}
                 </span>
               )}
-              <time className="text-xs text-gray-400 dark:text-gray-600">
+              <time className="text-xs font-light text-gray-700 dark:text-gray-300">
                 {new Date(post.createdAt).toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', {
                   year: 'numeric',
                   month: 'long',

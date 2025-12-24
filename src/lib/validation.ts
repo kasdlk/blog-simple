@@ -49,14 +49,34 @@ export function validateCategory(category: string): ValidationResult {
 }
 
 export function sanitizeInput(input: string): string {
-  // Remove null bytes and trim
-  return input.replace(/\0/g, '').trim();
+  if (typeof input !== 'string') {
+    return '';
+  }
+  // Remove null bytes, control characters, and trim
+  return input
+    .replace(/\0/g, '') // Remove null bytes
+    .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
+    .trim();
+}
+
+// Enhanced sanitization for HTML content (used for Markdown which is safe)
+export function sanitizeHtml(input: string): string {
+  if (typeof input !== 'string') {
+    return '';
+  }
+  // Basic sanitization - Markdown is rendered safely by react-markdown
+  // This is just an extra layer of protection
+  return sanitizeInput(input);
 }
 
 export function isValidDeviceId(deviceId: string): boolean {
   // Device ID should be a string starting with "device_" and contain alphanumeric characters
   return /^device_\d+_[a-z0-9]+$/.test(deviceId);
 }
+
+
+
+
 
 
 

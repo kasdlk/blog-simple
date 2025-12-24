@@ -16,16 +16,16 @@ export default function Markdown({ content }: MarkdownProps) {
         rehypePlugins={[rehypeHighlight]}
         components={{
           h1: (props) => (
-            <h1 className="text-3xl font-light mb-4 mt-8 first:mt-0 text-black dark:text-white" {...props} />
+            <h1 className="text-3xl sm:text-4xl font-light mb-6 mt-10 first:mt-0 text-black dark:text-white tracking-tight" {...props} />
           ),
           h2: (props) => (
-            <h2 className="text-2xl font-light mb-3 mt-6 text-black dark:text-white" {...props} />
+            <h2 className="text-2xl sm:text-3xl font-light mb-4 mt-8 text-black dark:text-white tracking-tight" {...props} />
           ),
           h3: (props) => (
-            <h3 className="text-xl font-light mb-2 mt-4 text-black dark:text-white" {...props} />
+            <h3 className="text-xl sm:text-2xl font-light mb-3 mt-6 text-black dark:text-white tracking-tight" {...props} />
           ),
           p: (props) => (
-            <p className="mb-4 leading-relaxed text-black dark:text-white" {...props} />
+            <p className="mb-5 sm:mb-6 leading-relaxed text-base sm:text-lg text-black dark:text-gray-100 font-light" {...props} />
           ),
           ul: (props) => (
             <ul className="mb-4 ml-6 list-disc" {...props} />
@@ -34,11 +34,11 @@ export default function Markdown({ content }: MarkdownProps) {
             <ol className="mb-4 ml-6 list-decimal" {...props} />
           ),
           li: (props) => (
-            <li className="mb-1 text-black dark:text-white" {...props} />
+            <li className="mb-1.5 text-black dark:text-gray-100" {...props} />
           ),
           blockquote: (props) => (
             <blockquote
-              className="border-l-4 border-gray-300 dark:border-gray-700 pl-4 my-4 italic text-black dark:text-white"
+              className="border-l-4 border-gray-300 dark:border-gray-600 pl-6 pr-4 py-2 my-6 italic text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-900 rounded-r-md"
               {...props}
             />
           ),
@@ -46,7 +46,7 @@ export default function Markdown({ content }: MarkdownProps) {
             const isInline = !className;
             return isInline ? (
               <code
-                className="bg-gray-100 dark:bg-gray-900 px-1.5 py-0.5 rounded text-sm text-black dark:text-white"
+                className="bg-gray-100 dark:bg-gray-900 px-1.5 py-0.5 rounded text-sm font-mono text-black dark:text-white border border-gray-200 dark:border-gray-800"
                 {...props}
               >
                 {children}
@@ -59,13 +59,13 @@ export default function Markdown({ content }: MarkdownProps) {
           },
           pre: (props) => (
             <pre
-              className="mb-4 p-4 rounded overflow-x-auto bg-gray-100 dark:bg-gray-900"
+              className="mb-6 p-4 sm:p-6 rounded-lg overflow-x-auto bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
               {...props}
             />
           ),
           a: (props) => (
             <a
-              className="text-black dark:text-white underline hover:opacity-70 transition-opacity"
+              className="text-gray-800 dark:text-gray-200 underline underline-offset-2 hover:text-black dark:hover:text-white transition-colors duration-300"
               {...props}
             />
           ),

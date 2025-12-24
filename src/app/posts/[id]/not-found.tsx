@@ -9,7 +9,7 @@ export default function NotFound() {
         </h1>
         <Link
           href="/"
-          className="text-sm text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+          className="text-sm text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
         >
           ← Back to Blog
         </Link>
@@ -17,6 +17,10 @@ export default function NotFound() {
     </div>
   );
 }
+
+
+
+
 
 
 

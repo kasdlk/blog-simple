@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPost, updatePost, deletePost } from '@/lib/posts';
 import { validateTitle, validateContent, validateCategory, sanitizeInput } from '@/lib/validation';
+import { requireAuth } from '@/lib/middleware';
 
 export async function GET(
   request: NextRequest,
@@ -8,6 +9,12 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    
+    // Validate post ID
+    if (!id || typeof id !== 'string' || id.trim().length === 0) {
+      return NextResponse.json({ error: 'Invalid post ID' }, { status: 400 });
+    }
+    
     const post = await getPost(id);
     if (!post) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
@@ -23,6 +30,10 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Require admin authentication
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     const { title, content, category } = await request.json();
@@ -69,6 +80,10 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Require admin authentication
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     const deleted = await deletePost(id);

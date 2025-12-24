@@ -28,6 +28,8 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   background-color: inherit;
   color: inherit;
+  font-size: inherit;
+  line-height: inherit;
 }
 
 /* Force dark mode styles when .dark class is present */
@@ -47,16 +49,38 @@ body {
   color: white !important;
 }
 
+/* 提高文字对比度 - 亮色模式 */
+.text-gray-400 {
+  color: rgb(55 65 81) !important; /* gray-700 */
+}
+
+.text-gray-500 {
+  color: rgb(31 41 55) !important; /* gray-800 */
+}
+
+.text-gray-600 {
+  color: rgb(17 24 39) !important; /* gray-900 */
+}
+
+/* 提高文字对比度 - 暗色模式 */
 .dark .text-gray-600 {
-  color: rgb(156 163 175) !important;
+  color: rgb(243 244 246) !important; /* gray-100 - 更亮 */
 }
 
 .dark .text-gray-400 {
-  color: rgb(156 163 175) !important;
+  color: rgb(229 231 235) !important; /* gray-200 - 更亮 */
 }
 
 .dark .text-gray-500 {
-  color: rgb(156 163 175) !important;
+  color: rgb(229 231 235) !important; /* gray-200 - 更亮 */
+}
+
+.dark .text-gray-700 {
+  color: rgb(243 244 246) !important; /* gray-100 - 更亮 */
+}
+
+.dark .text-gray-800 {
+  color: rgb(249 250 251) !important; /* gray-50 - 几乎白色，最亮 */
 }
 
 .dark .bg-gray-100 {
@@ -245,4 +269,91 @@ body {
 
 .hljs-strong {
   font-weight: bold;
+}
+
+/* MDEditor 样式覆盖 */
+.w-md-editor {
+  background-color: white !important;
+  border: 1px solid rgb(209 213 219) !important;
+  border-radius: 0.375rem !important;
+  overflow: hidden !important;
+}
+
+.dark .w-md-editor {
+  background-color: black !important;
+  border-color: rgb(55 65 81) !important;
+}
+
+.w-md-editor-text-pre {
+  color: black !important;
+  background-color: white !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+}
+
+.dark .w-md-editor-text-pre {
+  color: white !important;
+  background-color: black !important;
+}
+
+.w-md-editor-text-textarea {
+  color: black !important;
+  background-color: white !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+
+.dark .w-md-editor-text-textarea {
+  color: white !important;
+  background-color: black !important;
+}
+
+.w-md-editor-bar {
+  background-color: rgb(249 250 251) !important;
+  border-bottom: 1px solid rgb(229 231 235) !important;
+  padding: 8px 12px !important;
+}
+
+.dark .w-md-editor-bar {
+  background-color: rgb(17 24 39) !important;
+  border-bottom-color: rgb(55 65 81) !important;
+}
+
+.w-md-editor-bar svg {
+  color: rgb(75 85 99) !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.dark .w-md-editor-bar svg {
+  color: rgb(156 163 175) !important;
+}
+
+.w-md-editor-bar button {
+  padding: 4px 8px !important;
+  border-radius: 0.25rem !important;
+  transition: all 0.2s !important;
+}
+
+.w-md-editor-bar button:hover {
+  background-color: rgb(243 244 246) !important;
+}
+
+.dark .w-md-editor-bar button:hover {
+  background-color: rgb(31 41 55) !important;
+}
+
+.w-md-editor-text {
+  padding: 16px !important;
+}
+
+/* 预览区域样式 */
+.w-md-editor-preview {
+  background-color: white !important;
+  color: black !important;
+}
+
+.dark .w-md-editor-preview {
+  background-color: black !important;
+  color: white !important;
 }

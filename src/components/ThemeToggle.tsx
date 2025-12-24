@@ -52,7 +52,7 @@ export default function ThemeToggle({ language = 'en' }: ThemeToggleProps) {
   if (!mounted) {
     return (
       <button
-        className="relative inline-flex items-center justify-center px-3 py-1.5 text-xs font-light border border-gray-300 dark:border-gray-700 text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors rounded-full"
+        className="relative inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-light border border-gray-300 dark:border-gray-700 text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-900 transition-all duration-300 rounded-full active:scale-95"
         aria-label="Toggle theme"
       >
         <span className="relative z-10">{t.black}</span>
@@ -64,11 +64,11 @@ export default function ThemeToggle({ language = 'en' }: ThemeToggleProps) {
   return (
     <button
       onClick={toggleTheme}
-      className="relative inline-flex items-center justify-center px-3 py-1.5 text-xs font-light border border-gray-300 dark:border-gray-700 text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors rounded-full"
+      className="relative inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-light border border-gray-300 dark:border-gray-700 text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-900 hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-300 rounded-full active:scale-95"
       aria-label="Toggle theme"
     >
-      <span className="relative z-10">{isDark ? t.black : t.white}</span>
-      <span className="absolute inset-0 border border-black dark:border-2 dark:border-white rounded-full pointer-events-none"></span>
+      <span className="relative z-10 transition-opacity duration-300">{isDark ? t.black : t.white}</span>
+      <span className="absolute inset-0 border border-black dark:border-2 dark:border-white rounded-full pointer-events-none transition-opacity duration-300"></span>
     </button>
   );
 }

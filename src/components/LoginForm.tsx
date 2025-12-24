@@ -51,12 +51,12 @@ export default function LoginForm({ language = 'en' }: LoginFormProps) {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-light text-black dark:text-white mb-2">Admin Login</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">管理后台登录</p>
+          <p className="text-sm text-gray-800 dark:text-gray-200">管理后台登录</p>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <label className="block text-sm text-gray-800 dark:text-gray-200 mb-2">
               Username / 用户名
             </label>
             <input
@@ -70,7 +70,7 @@ export default function LoginForm({ language = 'en' }: LoginFormProps) {
           </div>
           
           <div>
-            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <label className="block text-sm text-gray-800 dark:text-gray-200 mb-2">
               Password / 密码
             </label>
             <input

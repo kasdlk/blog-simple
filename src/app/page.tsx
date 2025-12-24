@@ -47,32 +47,36 @@ export default async function Home({ searchParams }: HomeProps) {
           </aside>
 
           {/* Main Content - Blog */}
-          <div className="flex-1 max-w-2xl w-full">
-            <header className="mb-8 sm:mb-12 lg:mb-16">
-              <div className="text-center mb-6">
-                <h1 className="text-3xl sm:text-4xl font-light text-black dark:text-white">
+          <div className="flex-1 max-w-2xl w-full mx-auto lg:mx-0">
+            <header className="mb-10 sm:mb-14 lg:mb-20">
+              <div className="text-center mb-8">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light text-black dark:text-white mb-3 tracking-tight">
                   {settings.blogTitle || 'Blog'}
                 </h1>
                 {settings.blogSubtitle && (
-                  <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+                  <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 mt-2 font-light">
                     {settings.blogSubtitle}
                   </p>
                 )}
               </div>
-              <div className="flex justify-between items-center mb-6 gap-4">
-                <SearchBox language={lang} />
-                <ThemeToggle language={lang} />
+              <div className="flex justify-between items-center mb-8 gap-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="lg:hidden flex-shrink-0">
+                    <CategoryMenu categories={categories} currentCategory={category} language={lang} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <SearchBox language={lang} />
+                  </div>
+                </div>
+                <div className="flex-shrink-0">
+                  <ThemeToggle language={lang} />
+                </div>
               </div>
             </header>
 
             {/* Mobile Author Info */}
             <div className="lg:hidden mb-6">
               <AuthorInfo settings={settings} />
-            </div>
-
-            {/* Mobile Category Menu */}
-            <div className="lg:hidden mb-4">
-              <CategoryMenu categories={categories} currentCategory={category} language={lang} />
             </div>
 
             <main>

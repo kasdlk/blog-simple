@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateAdminCredentials, getAdminUser } from '@/lib/auth';
+import { requireAuth } from '@/lib/middleware';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Require admin authentication
+  const authError = requireAuth(request);
+  if (authError) return authError;
   try {
     const admin = await getAdminUser();
     if (!admin) {
@@ -16,6 +20,10 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
+  // Require admin authentication
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     const { username, password } = await request.json();
 
