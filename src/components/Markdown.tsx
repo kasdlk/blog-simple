@@ -42,7 +42,7 @@ export default function Markdown({ content }: MarkdownProps) {
               {...props}
             />
           ),
-          code: ({ className, children, ...props }: any) => {
+          code: ({ className, children, ...props }: React.ComponentPropsWithoutRef<'code'>) => {
             const isInline = !className;
             return isInline ? (
               <code
