@@ -402,54 +402,49 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-black admin-page">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-        <header className="mb-12 sm:mb-16 lg:mb-20">
-          <div className="flex justify-between items-start mb-8">
-            <Link href="/" className="text-2xl sm:text-3xl font-light text-black dark:text-white hover:opacity-70 transition-opacity tracking-tight">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
+        <header className="mb-10">
+          <div className="text-center mb-8">
+            <Link href="/" className="text-3xl sm:text-4xl lg:text-5xl font-light text-black dark:text-white hover:opacity-70 transition-opacity tracking-tight inline-block">
               {settings.blogTitle || 'Blog'}
             </Link>
-            <ThemeToggle language={lang} />
+            {settings.blogSubtitle && (
+              <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 mt-2 font-light">
+                {settings.blogSubtitle}
+              </p>
+            )}
           </div>
-          <div className="flex flex-col items-center text-center mb-10">
-            {settings.authorAvatar && (
-              <div className="mb-5">
+          <div className="flex justify-between items-center gap-3 pb-5 border-b border-gray-200 dark:border-gray-800">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              {settings.authorAvatar && (
                 <Image
                   src={settings.authorAvatar}
                   alt={settings.authorName || 'Author'}
-                  width={80}
-                  height={80}
-                  className="rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-800"
+                  width={48}
+                  height={48}
+                  className="rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-800 flex-shrink-0"
                 />
-              </div>
-            )}
-            {settings.authorName && (
-              <p className="text-lg font-light text-black dark:text-white mb-2">
-                {settings.authorName}
-              </p>
-            )}
-            {settings.authorBio && (
-              <p className="text-sm text-black dark:text-gray-100 max-w-md leading-relaxed font-light">
-                {settings.authorBio}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center justify-between mb-8 gap-4">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-light text-black dark:text-white tracking-tight">
-                {settings.blogTitle || t.manage}
-              </h2>
-              {settings.blogSubtitle && (
-                <p className="text-sm text-gray-800 dark:text-gray-200 mt-2 font-light">
-                  {settings.blogSubtitle}
-                </p>
               )}
+              <div className="flex-1 min-w-0">
+                {settings.authorName && (
+                  <p className="text-base font-light text-black dark:text-white mb-1">
+                    {settings.authorName}
+                  </p>
+                )}
+                {settings.authorBio && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-light line-clamp-1">
+                    {settings.authorBio}
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="flex gap-3 items-center">
+            <div className="flex items-center gap-3 flex-shrink-0">
               {!showSettings && (
-                <div className="w-64">
+                <div className="flex-1 min-w-0 max-w-xs">
                   <AdminSearchBox language={lang} onSearch={handleSearch} />
                 </div>
               )}
+              {!showSettings && <ThemeToggle language={lang} />}
               <button
                 onClick={() => {
                   setShowSettings(!showSettings);
