@@ -43,7 +43,7 @@ export default async function PostPage({
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light text-black dark:text-white mb-8 leading-tight tracking-tight">
             {post.title}
           </h1>
-          <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center gap-4 mb-4 pb-4 border-b border-gray-200 dark:border-gray-800">
             {settings.authorAvatar && (
               <Image
                 src={settings.authorAvatar}

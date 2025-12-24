@@ -138,14 +138,14 @@ export default function InfiniteScroll({
 
   return (
     <>
-      <div className="space-y-6 sm:space-y-8">
+      <div className="space-y-4 sm:space-y-6">
         {posts.map((post, index) => (
           <article
             key={post.id}
-            className={`group relative pt-8 sm:pt-10 pb-8 sm:pb-10 transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-700 ${
+            className={`group relative pb-4 sm:pb-6 transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-700 ${
               index === 0 
-                ? 'lg:border-t border-gray-200 dark:border-gray-800' 
-                : 'border-t border-gray-200 dark:border-gray-800'
+                ? 'pt-4 sm:pt-4 lg:border-t border-gray-200 dark:border-gray-800' 
+                : 'pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-800'
             }`}
           >
             <Link href={`/posts/${post.id}`} className="block">

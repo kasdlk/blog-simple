@@ -48,7 +48,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
           {/* Main Content - Blog */}
           <div className="flex-1 max-w-2xl w-full mx-auto lg:mx-0">
-            <header className="mb-10 sm:mb-14 lg:mb-20">
+            <header className="mb-6 sm:mb-8">
               <div className="text-center mb-8">
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light text-black dark:text-white mb-3 tracking-tight">
                   {settings.blogTitle || 'Blog'}
