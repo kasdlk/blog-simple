@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { extractPlainText } from '@/lib/markdown';
 import Markdown from '@/components/Markdown';
@@ -9,7 +9,6 @@ import { getTranslations, type Language } from '@/lib/i18n';
 import Modal from '@/components/Modal';
 import ConfirmModal from '@/components/ConfirmModal';
 import AdminSearchBox from '@/components/AdminSearchBox';
-import LoginForm from '@/components/LoginForm';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import '@uiw/react-md-editor/markdown-editor.css';
@@ -48,19 +47,21 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
 
   // Remove antialiased class from body for admin page
+  // 使用 subpixel-antialiased 来保持与前台相似的字体渲染效果
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Force remove antialiased immediately
       const body = document.body;
       body.classList.remove('antialiased');
-      body.style.setProperty('-webkit-font-smoothing', 'auto', 'important');
+      // 使用 subpixel-antialiased 而不是 auto，这样字体渲染会更接近前台
+      body.style.setProperty('-webkit-font-smoothing', 'subpixel-antialiased', 'important');
       body.style.setProperty('-moz-osx-font-smoothing', 'auto', 'important');
       
       // Also check periodically in case it gets re-added
       const interval = setInterval(() => {
         if (body.classList.contains('antialiased')) {
           body.classList.remove('antialiased');
-          body.style.setProperty('-webkit-font-smoothing', 'auto', 'important');
+          body.style.setProperty('-webkit-font-smoothing', 'subpixel-antialiased', 'important');
           body.style.setProperty('-moz-osx-font-smoothing', 'auto', 'important');
         }
       }, 100);
@@ -101,7 +102,6 @@ export default function AdminPage() {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
-  const [adminUsername, setAdminUsername] = useState('');
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -130,6 +130,24 @@ export default function AdminPage() {
     setModal({ isOpen: true, message });
   };
 
+  const fetchPosts = useCallback(async () => {
+    try {
+      const res = await fetch('/api/posts');
+      if (res.ok) {
+        const data = await res.json();
+        setPosts(data);
+        setFilteredPosts(data);
+      } else {
+        console.error('Failed to fetch posts:', res.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to fetch posts:', error);
+      showAlert('Failed to load posts. Please refresh the page.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     checkAuth();
   }, []);
@@ -140,7 +158,7 @@ export default function AdminPage() {
       fetchSettings();
       fetchAdminCredentials();
     }
-  }, [authenticated]);
+  }, [authenticated, fetchPosts]);
 
   const checkAuth = async () => {
     try {
@@ -164,7 +182,6 @@ export default function AdminPage() {
       const res = await fetch('/api/admin/credentials');
       if (res.ok) {
         const data = await res.json();
-        setAdminUsername(data.username || '');
         setNewUsername(data.username || '');
       }
     } catch (error) {
@@ -230,24 +247,6 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Failed to update credentials:', error);
       showAlert('Failed to update credentials');
-    }
-  };
-
-  const fetchPosts = async () => {
-    try {
-      const res = await fetch('/api/posts');
-      if (res.ok) {
-        const data = await res.json();
-        setPosts(data);
-        setFilteredPosts(data);
-      } else {
-        console.error('Failed to fetch posts:', res.statusText);
-      }
-    } catch (error) {
-      console.error('Failed to fetch posts:', error);
-      showAlert('Failed to load posts. Please refresh the page.');
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -365,9 +365,9 @@ body {
 }
 
 /* Force remove antialiased for admin pages - CSS override */
+/* 使用 subpixel-antialiased 来保持与前台相似的字体渲染效果 */
 .admin-page,
-body.antialiased .admin-page,
-.admin-page * {
-  -webkit-font-smoothing: auto !important;
+body.antialiased .admin-page {
+  -webkit-font-smoothing: subpixel-antialiased !important;
   -moz-osx-font-smoothing: auto !important;
 }
