@@ -3,6 +3,12 @@
 @theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-weight-light: 400;
+}
+
+/* Override font-light class to use 400 instead of 300 */
+.font-light {
+  font-weight: 400 !important;
 }
 
 /* Enable dark mode with class strategy */
