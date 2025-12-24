@@ -52,10 +52,12 @@ export function sanitizeInput(input: string): string {
   if (typeof input !== 'string') {
     return '';
   }
-  // Remove null bytes, control characters, and trim
+  // Remove null bytes and dangerous control characters, but preserve newlines (\n = \x0A, \r = \x0D)
+  // Keep: \n (0x0A), \r (0x0D), \t (0x09)
+  // Remove: null bytes, and other control characters except newlines and tabs
   return input
     .replace(/\0/g, '') // Remove null bytes
-    .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
+    .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '') // Remove control characters except \n, \r, \t
     .trim();
 }
 

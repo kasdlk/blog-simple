@@ -38,7 +38,7 @@ export default function Markdown({ content }: MarkdownProps) {
           ),
           blockquote: (props) => (
             <blockquote
-              className="border-l-4 border-gray-300 dark:border-gray-600 pl-6 pr-4 py-2 my-4 italic text-black dark:text-gray-100 bg-gray-50 dark:bg-gray-900 rounded-r-md [&>p:last-child]:mb-0"
+              className="border-l-4 border-gray-300 dark:border-gray-600 pl-6 pr-4 py-2 my-4 italic text-black dark:text-gray-100 bg-gray-50 dark:bg-gray-900 rounded-r-md [&>p:last-child]:mb-0 [&>ul:last-child]:mb-0 [&>ol:last-child]:mb-0 [&>li:last-child]:mb-0 [&>*:last-child]:mb-0"
               {...props}
             />
           ),
