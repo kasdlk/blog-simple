@@ -363,3 +363,11 @@ body {
   background-color: black !important;
   color: white !important;
 }
+
+/* Force remove antialiased for admin pages - CSS override */
+.admin-page,
+body.antialiased .admin-page,
+.admin-page * {
+  -webkit-font-smoothing: auto !important;
+  -moz-osx-font-smoothing: auto !important;
+}

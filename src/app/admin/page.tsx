@@ -402,7 +402,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-white dark:bg-black admin-page">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <header className="mb-12 sm:mb-16 lg:mb-20">
           <div className="flex justify-between items-start mb-8">
