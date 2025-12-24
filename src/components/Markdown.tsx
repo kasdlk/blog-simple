@@ -16,13 +16,13 @@ export default function Markdown({ content }: MarkdownProps) {
         rehypePlugins={[rehypeHighlight]}
         components={{
           h1: (props) => (
-            <h1 className="text-3xl sm:text-4xl font-light mb-6 mt-10 first:mt-0 text-black dark:text-white tracking-tight" {...props} />
+            <h1 className="text-2xl sm:text-3xl font-light mb-5 mt-8 first:mt-0 text-black dark:text-white tracking-tight" {...props} />
           ),
           h2: (props) => (
-            <h2 className="text-2xl sm:text-3xl font-light mb-4 mt-8 text-black dark:text-white tracking-tight" {...props} />
+            <h2 className="text-xl sm:text-2xl font-light mb-4 mt-7 text-black dark:text-white tracking-tight" {...props} />
           ),
           h3: (props) => (
-            <h3 className="text-xl sm:text-2xl font-light mb-3 mt-6 text-black dark:text-white tracking-tight" {...props} />
+            <h3 className="text-lg sm:text-xl font-light mb-3 mt-6 text-black dark:text-white tracking-tight" {...props} />
           ),
           p: (props) => (
             <p className="mb-5 sm:mb-6 leading-relaxed text-base sm:text-lg text-black dark:text-gray-100 font-light" {...props} />

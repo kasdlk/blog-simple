@@ -7,10 +7,22 @@ const dbPath = path.join(dbDir, 'blog.db');
 
 // Ensure data directory exists
 if (!existsSync(dbDir)) {
-  mkdirSync(dbDir, { recursive: true });
+  try {
+    mkdirSync(dbDir, { recursive: true });
+  } catch (error) {
+    throw new Error(`Failed to create data directory: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
-const db = new Database(dbPath);
+// Initialize database with error handling
+let db: Database.Database;
+try {
+  db = new Database(dbPath);
+  // Enable WAL mode for better concurrency
+  db.pragma('journal_mode = WAL');
+} catch (error) {
+  throw new Error(`Failed to initialize database: ${error instanceof Error ? error.message : String(error)}`);
+}
 
 // Initialize tables
 db.exec(`

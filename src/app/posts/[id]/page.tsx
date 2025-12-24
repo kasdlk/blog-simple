@@ -40,7 +40,7 @@ export default async function PostPage({
             </Link>
             <ThemeToggle language={lang} />
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light text-black dark:text-white mb-8 leading-tight tracking-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-black dark:text-white mb-8 leading-tight tracking-tight">
             {post.title}
           </h1>
           <div className="flex items-center gap-4 mb-4 pb-4 border-b border-gray-200 dark:border-gray-800">

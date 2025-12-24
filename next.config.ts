@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
   },
   // Turbopack configuration (empty for now, can be extended later)
   turbopack: {},
+  // Request body size limit (Note: In Next.js 16+, this is handled via middleware or route handlers)
+  // For API routes, add size checks in the route handlers themselves
   // Add asset prefix if needed (uncomment if using CDN)
   // assetPrefix: process.env.NODE_ENV === 'production' ? 'https://your-cdn.com' : '',
   // Security headers

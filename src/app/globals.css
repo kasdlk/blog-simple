@@ -6,6 +6,17 @@
   --font-weight-light: 400;
 }
 
+/* CSS Variables for repeated colors */
+:root {
+  --gray-50: rgb(249 250 251);
+  --gray-100: rgb(243 244 246);
+  --gray-200: rgb(229 231 235);
+  --gray-700: rgb(55 65 81);
+  --gray-800: rgb(31 41 55);
+  --gray-900: rgb(17 24 39);
+  --table-header-dark: #262121;
+}
+
 /* Override font-light class to use 400 instead of 300 */
 .font-light {
   font-weight: 400 !important;
@@ -38,109 +49,84 @@ body {
   line-height: inherit;
 }
 
-/* Force dark mode styles when .dark class is present */
-.dark .bg-white {
-  background-color: black !important;
-}
-
+/* Force dark mode styles - merged redundant rules */
+.dark .bg-white,
 .dark .bg-black {
   background-color: black !important;
 }
 
-.dark .text-black {
-  color: white !important;
-}
-
+.dark .text-black,
 .dark .text-white {
   color: white !important;
 }
 
 /* 提高文字对比度 - 亮色模式 */
 .text-gray-400 {
-  color: rgb(55 65 81) !important; /* gray-700 */
+  color: var(--gray-700) !important;
 }
 
 .text-gray-500 {
-  color: rgb(31 41 55) !important; /* gray-800 */
+  color: var(--gray-800) !important;
 }
 
 .text-gray-600 {
-  color: rgb(17 24 39) !important; /* gray-900 */
+  color: var(--gray-900) !important;
 }
 
-/* 提高文字对比度 - 暗色模式 */
-.dark .text-gray-600 {
-  color: rgb(243 244 246) !important; /* gray-100 - 更亮 */
-}
-
-.dark .text-gray-400 {
-  color: rgb(229 231 235) !important; /* gray-200 - 更亮 */
-}
-
+/* 提高文字对比度 - 暗色模式 - merged similar rules */
+.dark .text-gray-400,
 .dark .text-gray-500 {
-  color: rgb(229 231 235) !important; /* gray-200 - 更亮 */
+  color: var(--gray-200) !important;
 }
 
+.dark .text-gray-600,
 .dark .text-gray-700 {
-  color: rgb(243 244 246) !important; /* gray-100 - 更亮 */
+  color: var(--gray-100) !important;
 }
 
 .dark .text-gray-800 {
-  color: rgb(249 250 251) !important; /* gray-50 - 几乎白色，最亮 */
+  color: var(--gray-50) !important;
 }
 
-.dark .bg-gray-100 {
-  background-color: rgb(31 41 55) !important;
-}
-
+/* Background colors - merged similar rules */
+.dark .bg-gray-100,
 .dark .bg-gray-800 {
-  background-color: rgb(31 41 55) !important;
+  background-color: var(--gray-800) !important;
 }
 
 .dark .bg-gray-900 {
-  background-color: rgb(17 24 39) !important;
+  background-color: var(--gray-900) !important;
 }
 
-/* 表头在暗色模式下的背景色 - 覆盖 bg-gray-50 */
 .dark .bg-gray-50 {
-  background-color: #262121 !important;
+  background-color: var(--table-header-dark) !important;
 }
 
-/* 特别针对表头，确保优先级 */
+/* Table header specificity */
 .dark table th.bg-gray-50,
 .dark thead th,
 .dark th.bg-gray-50 {
-  background-color: #262121 !important;
+  background-color: var(--table-header-dark) !important;
 }
 
-.dark .border-gray-200 {
-  border-color: rgb(31 41 55) !important;
-}
-
-.dark .border-gray-300 {
-  border-color: rgb(55 65 81) !important;
-}
-
-.dark .border-gray-700 {
-  border-color: rgb(55 65 81) !important;
-}
-
+/* Border colors - merged similar rules */
+.dark .border-gray-200,
 .dark .border-gray-800 {
-  border-color: rgb(31 41 55) !important;
+  border-color: var(--gray-800) !important;
 }
 
-.dark .hover\:bg-gray-50:hover {
-  background-color: rgb(17 24 39) !important;
+.dark .border-gray-300,
+.dark .border-gray-700 {
+  border-color: var(--gray-700) !important;
 }
 
+/* Hover states - merged redundant rules */
+.dark .hover\:bg-gray-50:hover,
 .dark .hover\:bg-gray-900:hover {
-  background-color: rgb(17 24 39) !important;
+  background-color: var(--gray-900) !important;
 }
 
-.dark .hover\:text-black:hover {
-  color: white !important;
-}
-
+.dark .hover\:text-black:hover,
 .dark .hover\:text-white:hover {
   color: white !important;
 }
@@ -200,20 +186,14 @@ body {
 }
 
 .hljs-function,
-.hljs-params {
-  color: #e36209;
-}
-
-.dark .hljs-function,
-.dark .hljs-params {
-  color: #ffa657;
-}
-
+.hljs-params,
 .hljs-variable,
 .hljs-template-variable {
   color: #e36209;
 }
 
+.dark .hljs-function,
+.dark .hljs-params,
 .dark .hljs-variable,
 .dark .hljs-template-variable {
   color: #ffa657;
@@ -287,42 +267,36 @@ body {
 
 .dark .w-md-editor {
   background-color: black !important;
-  border-color: rgb(55 65 81) !important;
+  border-color: var(--gray-700) !important;
 }
 
-.w-md-editor-text-pre {
-  color: black !important;
-  background-color: white !important;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
-}
-
-.dark .w-md-editor-text-pre {
-  color: white !important;
-  background-color: black !important;
-}
-
+.w-md-editor-text-pre,
 .w-md-editor-text-textarea {
   color: black !important;
   background-color: white !important;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
-  font-size: 14px !important;
-  line-height: 1.6 !important;
 }
 
+.dark .w-md-editor-text-pre,
 .dark .w-md-editor-text-textarea {
   color: white !important;
   background-color: black !important;
 }
 
+.w-md-editor-text-textarea {
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+
 .w-md-editor-bar {
-  background-color: rgb(249 250 251) !important;
-  border-bottom: 1px solid rgb(229 231 235) !important;
+  background-color: var(--gray-50) !important;
+  border-bottom: 1px solid var(--gray-200) !important;
   padding: 8px 12px !important;
 }
 
 .dark .w-md-editor-bar {
-  background-color: rgb(17 24 39) !important;
-  border-bottom-color: rgb(55 65 81) !important;
+  background-color: var(--gray-900) !important;
+  border-bottom-color: var(--gray-700) !important;
 }
 
 .w-md-editor-bar svg {
@@ -342,11 +316,11 @@ body {
 }
 
 .w-md-editor-bar button:hover {
-  background-color: rgb(243 244 246) !important;
+  background-color: var(--gray-100) !important;
 }
 
 .dark .w-md-editor-bar button:hover {
-  background-color: rgb(31 41 55) !important;
+  background-color: var(--gray-800) !important;
 }
 
 .w-md-editor-text {
@@ -364,8 +338,7 @@ body {
   color: white !important;
 }
 
-/* Force remove antialiased for admin pages - CSS override */
-/* 使用 subpixel-antialiased 来保持与前台相似的字体渲染效果 */
+/* Force remove antialiased for admin pages */
 .admin-page,
 body.antialiased .admin-page {
   -webkit-font-smoothing: subpixel-antialiased !important;
