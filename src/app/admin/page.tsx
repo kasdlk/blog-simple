@@ -49,16 +49,30 @@ export default function AdminPage() {
 
   // Remove antialiased class from body for admin page
   useEffect(() => {
-    document.body.classList.remove('antialiased');
-    document.body.style.setProperty('-webkit-font-smoothing', 'auto');
-    document.body.style.setProperty('-moz-osx-font-smoothing', 'auto');
-    
-    return () => {
-      // Restore on unmount if needed
-      document.body.classList.add('antialiased');
-      document.body.style.removeProperty('-webkit-font-smoothing');
-      document.body.style.removeProperty('-moz-osx-font-smoothing');
-    };
+    if (typeof window !== 'undefined') {
+      // Force remove antialiased immediately
+      const body = document.body;
+      body.classList.remove('antialiased');
+      body.style.setProperty('-webkit-font-smoothing', 'auto', 'important');
+      body.style.setProperty('-moz-osx-font-smoothing', 'auto', 'important');
+      
+      // Also check periodically in case it gets re-added
+      const interval = setInterval(() => {
+        if (body.classList.contains('antialiased')) {
+          body.classList.remove('antialiased');
+          body.style.setProperty('-webkit-font-smoothing', 'auto', 'important');
+          body.style.setProperty('-moz-osx-font-smoothing', 'auto', 'important');
+        }
+      }, 100);
+      
+      return () => {
+        clearInterval(interval);
+        // Restore on unmount if needed
+        body.classList.add('antialiased');
+        body.style.removeProperty('-webkit-font-smoothing');
+        body.style.removeProperty('-moz-osx-font-smoothing');
+      };
+    }
   }, []);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [showForm, setShowForm] = useState(false);
