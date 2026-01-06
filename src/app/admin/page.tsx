@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
+import { useState, useEffect, useCallback, useLayoutEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { extractPlainText } from '@/lib/markdown';
 import Markdown from '@/components/Markdown';
@@ -114,6 +114,27 @@ export default function AdminPage() {
   
   const lang = (settings.language || 'en') as Language;
   const t = getTranslations(lang);
+
+  // 关键词自动补全：从已加载的文章里提取历史关键词（按频次排序）
+  const keywordSuggestions = useMemo(() => {
+    const freq = new Map<string, { label: string; count: number }>();
+    for (const p of posts) {
+      const parts = (p.keywords || '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      for (const kw of parts) {
+        const key = kw.toLowerCase();
+        const cur = freq.get(key);
+        if (cur) cur.count += 1;
+        else freq.set(key, { label: kw, count: 1 });
+      }
+    }
+    return [...freq.values()]
+      .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+      .slice(0, 30)
+      .map((x) => x.label);
+  }, [posts]);
 
   // 检测暗色模式
   useEffect(() => {
@@ -776,11 +797,17 @@ export default function AdminPage() {
                   </label>
                   <input
                     type="text"
+                    list="keyword-suggestions"
                     value={formData.keywords}
                     onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
                     className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 focus:border-transparent transition-all duration-300 rounded-md font-light"
                     placeholder="例如：悖论, 哲学, 逻辑（逗号分隔）"
                   />
+                  <datalist id="keyword-suggestions">
+                    {keywordSuggestions.map((k) => (
+                      <option key={k} value={k} />
+                    ))}
+                  </datalist>
                 </div>
                 <div>
                   <label className="block text-sm text-gray-800 dark:text-gray-200 mb-2">

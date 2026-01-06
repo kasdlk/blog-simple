@@ -2,6 +2,7 @@ import { getPosts, getCategories } from '@/lib/posts';
 import { getSettings } from '@/lib/settings';
 import { type Language } from '@/lib/i18n';
 import { formatDate } from '@/lib/utils';
+import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
 import CategoryMenu, { CategorySidebar } from '@/components/CategoryMenu';
 import SearchBox from '@/components/SearchBox';
@@ -9,17 +10,18 @@ import AuthorInfo from '@/components/AuthorInfo';
 import InfiniteScroll from '@/components/InfiniteScroll';
 
 interface HomeProps {
-  searchParams: Promise<{ category?: string; page?: string }>;
+  searchParams: Promise<{ category?: string; keyword?: string; page?: string }>;
 }
 
 export default async function Home({ searchParams }: HomeProps) {
   const params = await searchParams;
   const category = params.category || '';
+  const keyword = params.keyword || '';
   const page = parseInt(params.page || '1', 10);
   const pageSize = 10;
 
   const [data, settings, categories] = await Promise.all([
-    getPosts(category || undefined, page, pageSize),
+    getPosts(category || undefined, page, pageSize, keyword || undefined),
     getSettings(),
     getCategories(),
   ]);
@@ -80,11 +82,34 @@ export default async function Home({ searchParams }: HomeProps) {
             </div>
 
             <main>
+              {(category || keyword) && (
+                <div className="mb-4 flex flex-wrap items-center gap-2">
+                  {category && (
+                    <Link
+                      href={keyword ? `/?keyword=${encodeURIComponent(keyword)}` : '/'}
+                      className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      title="清除分类筛选"
+                    >
+                      分类：{category} ×
+                    </Link>
+                  )}
+                  {keyword && (
+                    <Link
+                      href={category ? `/?category=${encodeURIComponent(category)}` : '/'}
+                      className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      title="清除关键词筛选"
+                    >
+                      关键词：{keyword} ×
+                    </Link>
+                  )}
+                </div>
+              )}
               <InfiniteScroll
                 initialPosts={postsWithFormattedDates}
                 initialPage={page}
                 total={data.total}
                 category={category || undefined}
+                keyword={keyword || undefined}
                 language={lang}
                 pageSize={pageSize}
                 enableComments={settings.enableComments === 'true'}

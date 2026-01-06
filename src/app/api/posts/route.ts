@@ -10,14 +10,16 @@ export async function GET(request: NextRequest) {
     const page = searchParams.get('page');
     const pageSize = searchParams.get('pageSize');
     const category = searchParams.get('category');
+    const keyword = searchParams.get('keyword');
 
     // If pagination params are provided, return paginated results (for frontend)
     if (page || pageSize) {
       const pageNum = page ? parseInt(page, 10) : 1;
       const pageSizeNum = pageSize ? parseInt(pageSize, 10) : 10;
       const categoryParam = category || undefined;
+      const keywordParam = keyword ? keyword.trim() : undefined;
       
-      const result = await getPosts(categoryParam, pageNum, pageSizeNum);
+      const result = await getPosts(categoryParam, pageNum, pageSizeNum, keywordParam);
       return NextResponse.json(result);
     }
 

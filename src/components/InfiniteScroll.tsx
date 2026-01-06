@@ -13,6 +13,7 @@ interface Post {
   title: string;
   content: string;
   category: string;
+  keywords?: string;
   createdAt: string;
   formattedDate?: string; // Server-formatted date to avoid hydration mismatch
 }
@@ -22,6 +23,7 @@ interface InfiniteScrollProps {
   initialPage: number;
   total: number;
   category?: string;
+  keyword?: string;
   language: Language;
   pageSize?: number;
   enableComments: boolean;
@@ -34,6 +36,7 @@ export default function InfiniteScroll({
   initialPage,
   total,
   category,
+  keyword,
   language,
   pageSize = 10,
   enableComments,
@@ -49,8 +52,10 @@ export default function InfiniteScroll({
   const searchParams = useSearchParams();
   const t = getTranslations(language);
 
-  // Get current category from URL to detect changes
+  // Get current filters from URL to detect changes
   const currentCategoryFromUrl = searchParams.get('category') || undefined;
+  const currentKeywordFromUrl = searchParams.get('keyword') || undefined;
+  const currentFilterKey = `${currentCategoryFromUrl || ''}::${currentKeywordFromUrl || ''}`;
 
   // Keep the current list URL so the post page can "go back" to it (e.g. category page)
   const from = useMemo(() => {
@@ -64,7 +69,7 @@ export default function InfiniteScroll({
     setPage(initialPage);
     setHasMore(initialPosts.length < total);
     setLoading(false);
-  }, [currentCategoryFromUrl, initialPosts, initialPage, total]);
+  }, [currentFilterKey, initialPosts, initialPage, total]);
 
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
@@ -78,6 +83,9 @@ export default function InfiniteScroll({
       });
       if (category) {
         params.append('category', category);
+      }
+      if (keyword) {
+        params.append('keyword', keyword);
       }
 
       const res = await fetch(`/api/posts?${params.toString()}`);
@@ -104,7 +112,7 @@ export default function InfiniteScroll({
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, category, hasMore, loading, language]);
+  }, [page, pageSize, category, keyword, hasMore, loading, language]);
 
   useEffect(() => {
     if (!hasMore || loading) return;

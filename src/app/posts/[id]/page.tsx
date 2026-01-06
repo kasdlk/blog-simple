@@ -85,6 +85,10 @@ export default async function PostPage({
     // ignore
   }
   const { prev, next } = await getAdjacentPosts(post.id, navCategory);
+  const keywords = (post.keywords || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
@@ -128,6 +132,25 @@ export default async function PostPage({
               </time>
             </div>
           </div>
+          {keywords.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {keywords.map((k) => {
+                const href = post.category
+                  ? `/?category=${encodeURIComponent(post.category)}&keyword=${encodeURIComponent(k)}`
+                  : `/?keyword=${encodeURIComponent(k)}`;
+                return (
+                  <Link
+                    key={k}
+                    href={href}
+                    className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    title="点击按关键词筛选"
+                  >
+                    {k}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </header>
 
         <article className="max-w-none">

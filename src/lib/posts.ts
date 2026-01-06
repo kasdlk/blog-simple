@@ -11,28 +11,35 @@ export interface Post {
   updatedAt: string;
 }
 
-export async function getPosts(category?: string, page: number = 1, pageSize: number = 10): Promise<{ posts: Post[]; total: number }> {
+export async function getPosts(
+  category?: string,
+  page: number = 1,
+  pageSize: number = 10,
+  keyword?: string
+): Promise<{ posts: Post[]; total: number }> {
   // Validate and limit page size
   const safePageSize = Math.min(Math.max(1, pageSize), 50);
   const safePage = Math.max(1, page);
   const offset = (safePage - 1) * safePageSize;
   
+  const where: string[] = [];
+  const params: unknown[] = [];
+  if (category) {
+    where.push('category = ?');
+    params.push(category);
+  }
+  if (keyword) {
+    where.push('keywords LIKE ?');
+    params.push(`%${keyword}%`);
+  }
+  const whereClause = where.length > 0 ? `WHERE ${where.join(' AND ')}` : '';
+
   // Use prepared statements for better performance and security
-  const countStmt = category 
-    ? db.prepare('SELECT COUNT(*) as count FROM posts WHERE category = ?')
-    : db.prepare('SELECT COUNT(*) as count FROM posts');
-  
-  const total = category
-    ? (countStmt.get(category) as { count: number }).count
-    : (countStmt.get() as { count: number }).count;
-  
-  const postsStmt = category
-    ? db.prepare('SELECT * FROM posts WHERE category = ? ORDER BY createdAt DESC LIMIT ? OFFSET ?')
-    : db.prepare('SELECT * FROM posts ORDER BY createdAt DESC LIMIT ? OFFSET ?');
-  
-  const posts = category
-    ? postsStmt.all(category, safePageSize, offset) as Post[]
-    : postsStmt.all(safePageSize, offset) as Post[];
+  const countStmt = db.prepare(`SELECT COUNT(*) as count FROM posts ${whereClause}`);
+  const total = (countStmt.get(...params) as { count: number }).count;
+
+  const postsStmt = db.prepare(`SELECT * FROM posts ${whereClause} ORDER BY createdAt DESC LIMIT ? OFFSET ?`);
+  const posts = postsStmt.all(...params, safePageSize, offset) as Post[];
   
   return { posts, total };
 }
