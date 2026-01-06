@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import Link from 'next/link';
 import { extractPlainText } from '@/lib/markdown';
 import Markdown from '@/components/Markdown';
@@ -162,6 +162,13 @@ export default function AdminPage() {
       fetchAdminCredentials();
     }
   }, [authenticated, fetchPosts]);
+
+  // 进入“新建/编辑”表单时，确保滚动到页面顶部。
+  // 用 useLayoutEffect + 非 smooth，避免出现“从底部滑到顶部”的视觉滚动过程。
+  useLayoutEffect(() => {
+    if (!showForm) return;
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [showForm]);
 
   const checkAuth = async () => {
     try {
