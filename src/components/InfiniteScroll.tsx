@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { extractPlainText } from '@/lib/markdown';
 import { getTranslations, type Language } from '@/lib/i18n';
@@ -45,11 +45,18 @@ export default function InfiniteScroll({
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialPosts.length < total);
   const observerTarget = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const t = getTranslations(language);
 
   // Get current category from URL to detect changes
   const currentCategoryFromUrl = searchParams.get('category') || undefined;
+
+  // Keep the current list URL so the post page can "go back" to it (e.g. category page)
+  const from = useMemo(() => {
+    const qs = searchParams.toString();
+    return `${pathname}${qs ? `?${qs}` : ''}` || '/';
+  }, [pathname, searchParams]);
 
   // Reset posts when category changes (detected from URL) or when initialPosts update
   useEffect(() => {
@@ -97,7 +104,7 @@ export default function InfiniteScroll({
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, category, hasMore, loading]);
+  }, [page, pageSize, category, hasMore, loading, language]);
 
   useEffect(() => {
     if (!hasMore || loading) return;
@@ -148,12 +155,12 @@ export default function InfiniteScroll({
                 : 'pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-800'
             }`}
           >
-            <Link href={`/posts/${post.id}`} className="block">
+            <Link href={`/posts/${post.id}?from=${encodeURIComponent(from)}`} className="block">
               <h2 className="text-xl sm:text-2xl font-light text-black dark:text-white mb-3 sm:mb-4 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-80">
                 {post.title}
               </h2>
             </Link>
-            <Link href={`/posts/${post.id}`} className="block">
+            <Link href={`/posts/${post.id}?from=${encodeURIComponent(from)}`} className="block">
               <p className="text-gray-800 dark:text-gray-200 text-sm mb-4 sm:mb-6 line-clamp-3 transition-opacity duration-300 group-hover:opacity-80 cursor-pointer">
                 {extractPlainText(post.content, 200)}
               </p>

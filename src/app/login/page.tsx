@@ -1,6 +1,6 @@
 import LoginForm from '@/components/LoginForm';
 import { getSettings } from '@/lib/settings';
-import { getTranslations, type Language } from '@/lib/i18n';
+import { type Language } from '@/lib/i18n';
 
 export default async function LoginPage() {
   const settings = await getSettings();

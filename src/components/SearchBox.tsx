@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { extractPlainText } from '@/lib/markdown';
 import { getTranslations, type Language } from '@/lib/i18n';
 
@@ -25,7 +26,14 @@ export default function SearchBox({ language = 'en' }: SearchBoxProps) {
   const [isSearching, setIsSearching] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const t = getTranslations(language);
+
+  const from = (() => {
+    const qs = searchParams.toString();
+    return `${pathname}${qs ? `?${qs}` : ''}` || '/';
+  })();
 
   useEffect(() => {
     if (query.trim().length > 0) {
@@ -132,7 +140,7 @@ export default function SearchBox({ language = 'en' }: SearchBoxProps) {
                   {results.map((post) => (
                     <Link
                       key={post.id}
-                      href={`/posts/${post.id}`}
+                      href={`/posts/${post.id}?from=${encodeURIComponent(from)}`}
                       onClick={() => {
                         setQuery('');
                         setIsOpen(false);

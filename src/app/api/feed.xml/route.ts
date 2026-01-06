@@ -41,7 +41,7 @@ export async function GET() {
         'Content-Type': 'application/xml; charset=utf-8',
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to generate RSS feed' }, { status: 500 });
   }
 }

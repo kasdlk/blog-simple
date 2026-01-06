@@ -61,6 +61,47 @@ export async function getPost(id: string): Promise<Post | null> {
   return post || null;
 }
 
+export type AdjacentPost = Pick<Post, 'id' | 'title' | 'category' | 'createdAt'>;
+
+/**
+ * Get previous/next post based on createdAt order (DESC).
+ * - prev: newer post (上一篇)
+ * - next: older post (下一篇)
+ * If category provided, navigation is scoped to that category.
+ */
+export async function getAdjacentPosts(postId: string, category?: string): Promise<{
+  prev: AdjacentPost | null;
+  next: AdjacentPost | null;
+}> {
+  const current = await getPost(postId);
+  if (!current) return { prev: null, next: null };
+
+  const baseWhere = category ? 'AND category = ?' : '';
+  const paramsFor = (extra: unknown[]) => (category ? [...extra, category] : extra);
+
+  // Prev (newer): closest post with createdAt > current (tie-break by id)
+  const prevStmt = db.prepare(
+    `SELECT id, title, category, createdAt
+     FROM posts
+     WHERE (createdAt > ? OR (createdAt = ? AND id > ?)) ${baseWhere}
+     ORDER BY createdAt ASC, id ASC
+     LIMIT 1`
+  );
+  const prev = prevStmt.get(...paramsFor([current.createdAt, current.createdAt, current.id])) as AdjacentPost | undefined;
+
+  // Next (older): closest post with createdAt < current (tie-break by id)
+  const nextStmt = db.prepare(
+    `SELECT id, title, category, createdAt
+     FROM posts
+     WHERE (createdAt < ? OR (createdAt = ? AND id < ?)) ${baseWhere}
+     ORDER BY createdAt DESC, id DESC
+     LIMIT 1`
+  );
+  const next = nextStmt.get(...paramsFor([current.createdAt, current.createdAt, current.id])) as AdjacentPost | undefined;
+
+  return { prev: prev || null, next: next || null };
+}
+
 export async function incrementViews(id: string): Promise<void> {
   const stmt = db.prepare('UPDATE posts SET views = views + 1 WHERE id = ?');
   stmt.run(id);

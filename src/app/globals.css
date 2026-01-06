@@ -49,6 +49,16 @@ body {
   line-height: inherit;
 }
 
+/* 隐藏滚动条（保留滚动能力） */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge legacy */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
 /* Force dark mode styles - merged redundant rules */
 .dark .bg-white,
 .dark .bg-black {

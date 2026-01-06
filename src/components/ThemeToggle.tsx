@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { getTranslations, type Language } from '@/lib/i18n';
 
 interface ThemeToggleProps {
@@ -8,29 +8,15 @@ interface ThemeToggleProps {
 }
 
 export default function ThemeToggle({ language = 'en' }: ThemeToggleProps) {
-  const [mounted, setMounted] = useState(false);
-  const [isDark, setIsDark] = useState(true);
-  const t = getTranslations(language);
-
-  useEffect(() => {
-    setMounted(true);
-    const html = document.documentElement;
-    
-    // Get theme from localStorage or default to dark
+  // 通过 html class/localStorage 推导初始主题，避免在 effect 里同步 setState（会触发 lint 且可能引起抖动）
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
     const stored = localStorage.getItem('theme');
-    const shouldBeDark = stored ? stored === 'dark' : true;
-    
-    // Apply theme immediately
-    if (shouldBeDark) {
-      html.classList.add('dark');
-      html.classList.remove('light');
-    } else {
-      html.classList.remove('dark');
-      html.classList.add('light');
-    }
-    
-    setIsDark(shouldBeDark);
-  }, []);
+    if (stored === 'dark') return true;
+    if (stored === 'light') return false;
+    return document.documentElement.classList.contains('dark');
+  });
+  const t = getTranslations(language);
 
   const toggleTheme = () => {
     const html = document.documentElement;
@@ -48,18 +34,6 @@ export default function ThemeToggle({ language = 'en' }: ThemeToggleProps) {
     setIsDark(newIsDark);
     localStorage.setItem('theme', newIsDark ? 'dark' : 'light');
   };
-
-  if (!mounted) {
-    return (
-      <button
-        className="relative inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-light border border-gray-300 dark:border-gray-700 text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-900 transition-all duration-300 rounded-full active:scale-95"
-        aria-label="Toggle theme"
-      >
-        <span className="relative z-10">{t.black}</span>
-        <span className="absolute inset-0 border border-black dark:border-2 dark:border-white rounded-full pointer-events-none"></span>
-      </button>
-    );
-  }
 
   return (
     <button

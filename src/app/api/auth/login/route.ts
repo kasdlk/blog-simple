@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     // Simple token validation (in production, use proper JWT validation)
     return NextResponse.json({ authenticated: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ authenticated: false });
   }
 }

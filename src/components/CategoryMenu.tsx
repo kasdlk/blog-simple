@@ -129,7 +129,7 @@ export default function CategoryMenu({ categories, currentCategory, language = '
             className={`fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isOpen ? 'opacity-100' : 'opacity-0'}`}
             onClick={() => setIsOpen(false)}
           />
-          <aside className={`category-sidebar fixed left-0 top-0 h-full w-64 bg-white dark:bg-black border-r border-gray-200 dark:border-gray-800 z-50 lg:hidden overflow-y-auto transform-gpu transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isOpen ? 'translate-x-0 opacity-100 scale-100 shadow-2xl' : '-translate-x-0 opacity-0 scale-95 -translate-x-4'} ${!isOpen ? 'invisible' : 'visible'}`}>
+          <aside className={`category-sidebar fixed left-0 top-0 h-full w-64 bg-white dark:bg-black border-r border-gray-200 dark:border-gray-800 z-50 lg:hidden overflow-y-auto hide-scrollbar transform-gpu transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isOpen ? 'translate-x-0 opacity-100 scale-100 shadow-2xl' : '-translate-x-0 opacity-0 scale-95 -translate-x-4'} ${!isOpen ? 'invisible' : 'visible'}`}>
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wide">
@@ -181,39 +181,35 @@ export function CategorySidebar({ categories, currentCategory, language = 'en' }
   const t = getTranslations(language);
   
   return (
-    <aside className="w-48 flex-shrink-0 hidden lg:block">
-      <div className="sticky top-16">
-        <div className="mb-8">
-          <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-4 uppercase tracking-wide">
-            {t.categories}
-          </h3>
-          <div className="space-y-2">
-            <Link
-              href="/"
-              className={`block text-sm py-2 px-3 rounded-md transition-all duration-300 ${
-                !currentCategory
-                  ? 'text-black dark:text-white font-medium bg-gray-100 dark:bg-gray-800 border-l-2 border-black dark:border-white'
-                        : 'text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900 hover:translate-x-1'
-              }`}
-            >
-              {t.all}
-            </Link>
-            {categories.map((cat) => (
-              <Link
-                key={cat}
-                href={`/?category=${encodeURIComponent(cat)}`}
-                className={`block text-sm py-2 px-3 rounded-md transition-all duration-300 ${
-                  currentCategory === cat
-                    ? 'text-black dark:text-white font-medium bg-gray-100 dark:bg-gray-800 border-l-2 border-black dark:border-white'
-                        : 'text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900 hover:translate-x-1'
-                }`}
-              >
-                {cat}
-              </Link>
-            ))}
-          </div>
-        </div>
+    <div className="mb-8">
+      <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-4 uppercase tracking-wide">
+        {t.categories}
+      </h3>
+      <div className="space-y-2">
+        <Link
+          href="/"
+          className={`block text-sm py-2 px-3 rounded-md transition-all duration-300 ${
+            !currentCategory
+              ? 'text-black dark:text-white font-medium bg-gray-100 dark:bg-gray-800 border-l-2 border-black dark:border-white'
+              : 'text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900 hover:translate-x-1'
+          }`}
+        >
+          {t.all}
+        </Link>
+        {categories.map((cat) => (
+          <Link
+            key={cat}
+            href={`/?category=${encodeURIComponent(cat)}`}
+            className={`block text-sm py-2 px-3 rounded-md transition-all duration-300 ${
+              currentCategory === cat
+                ? 'text-black dark:text-white font-medium bg-gray-100 dark:bg-gray-800 border-l-2 border-black dark:border-white'
+                : 'text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900 hover:translate-x-1'
+            }`}
+          >
+            {cat}
+          </Link>
+        ))}
       </div>
-    </aside>
+    </div>
   );
 }

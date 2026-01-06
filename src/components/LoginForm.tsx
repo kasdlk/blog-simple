@@ -8,13 +8,13 @@ interface LoginFormProps {
   language?: Language;
 }
 
-export default function LoginForm({ language = 'en' }: LoginFormProps) {
+export default function LoginForm({ language: _language = 'en' }: LoginFormProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const t = getTranslations(language);
+  const t = getTranslations(_language);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +31,11 @@ export default function LoginForm({ language = 'en' }: LoginFormProps) {
       const data = await res.json();
 
       if (res.ok) {
-        // Wait a bit for cookie to be set, then redirect
+        // 等 cookie 写入后跳转；用客户端路由避免整页刷新导致的闪动/抖动
         setTimeout(() => {
-          window.location.href = '/admin';
-        }, 100);
+          router.replace('/admin');
+          router.refresh();
+        }, 50);
       } else {
         setError(data.error || 'Login failed');
       }
@@ -57,7 +58,7 @@ export default function LoginForm({ language = 'en' }: LoginFormProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm text-gray-800 dark:text-gray-200 mb-2">
-              Username / 用户名
+              {t.adminUsername}
             </label>
             <input
               type="text"
@@ -71,7 +72,7 @@ export default function LoginForm({ language = 'en' }: LoginFormProps) {
           
           <div>
             <label className="block text-sm text-gray-800 dark:text-gray-200 mb-2">
-              Password / 密码
+              {t.adminPassword}
             </label>
             <input
               type="password"
@@ -82,18 +83,17 @@ export default function LoginForm({ language = 'en' }: LoginFormProps) {
             />
           </div>
 
-          {error && (
-            <div className="text-sm text-red-500 dark:text-red-400">
-              {error}
-            </div>
-          )}
+          {/* 错误区域固定占位，避免出现/消失导致布局“颤抖” */}
+          <div className="text-sm min-h-5 text-red-500 dark:text-red-400">
+            {error || '\u00A0'}
+          </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 bg-black dark:bg-white text-white dark:text-black hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-10 px-4 text-sm border border-gray-300 dark:border-gray-700 bg-black dark:bg-white text-white dark:text-black hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            {loading ? 'Logging in...' : 'Login / 登录'}
+            {loading ? t.searching : t.submit}
           </button>
         </form>
       </div>

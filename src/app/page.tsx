@@ -1,6 +1,6 @@
 import { getPosts, getCategories } from '@/lib/posts';
 import { getSettings } from '@/lib/settings';
-import { getTranslations, type Language } from '@/lib/i18n';
+import { type Language } from '@/lib/i18n';
 import { formatDate } from '@/lib/utils';
 import ThemeToggle from '@/components/ThemeToggle';
 import CategoryMenu, { CategorySidebar } from '@/components/CategoryMenu';
@@ -24,9 +24,7 @@ export default async function Home({ searchParams }: HomeProps) {
     getCategories(),
   ]);
 
-  const totalPages = Math.ceil(data.total / pageSize);
   const lang = (settings.language || 'en') as Language;
-  const t = getTranslations(lang);
 
   // Format dates on server side to avoid hydration mismatch
   const postsWithFormattedDates = data.posts.map(post => ({
@@ -40,9 +38,11 @@ export default async function Home({ searchParams }: HomeProps) {
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-12">
           {/* Left Sidebar - Author Info + Categories (Desktop) */}
           <aside className="w-48 flex-shrink-0 hidden lg:block">
-            <div className="sticky top-16">
+            <div className="sticky top-16 max-h-[calc(100vh-4rem)] overflow-hidden pr-2 flex flex-col">
               <AuthorInfo settings={settings} />
-              <CategorySidebar categories={categories} currentCategory={category} language={lang} />
+              <div className="flex-1 overflow-y-auto overscroll-contain hide-scrollbar">
+                <CategorySidebar categories={categories} currentCategory={category} language={lang} />
+              </div>
             </div>
           </aside>
 

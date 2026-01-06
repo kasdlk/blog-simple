@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getPost } from '@/lib/posts';
+import { getAdjacentPosts, getPost } from '@/lib/posts';
 import { getSettings } from '@/lib/settings';
 import { getTranslations, type Language } from '@/lib/i18n';
 import Markdown from '@/components/Markdown';
@@ -10,10 +10,25 @@ import PostInteractions from '@/components/PostInteractions';
 
 export default async function PostPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ from?: string }>;
 }) {
   const { id } = await params;
+  const sp = await searchParams;
+  let backHref = '/';
+  if (typeof sp?.from === 'string' && sp.from.length > 0) {
+    try {
+      const decoded = decodeURIComponent(sp.from);
+      // Only allow in-site relative paths
+      if (decoded.startsWith('/')) {
+        backHref = decoded;
+      }
+    } catch {
+      // ignore invalid encoding
+    }
+  }
   const [post, settings] = await Promise.all([
     getPost(id),
     getSettings(),
@@ -26,13 +41,24 @@ export default async function PostPage({
   const lang = (settings.language || 'en') as Language;
   const t = getTranslations(lang);
 
+  // If user came from a category list, keep prev/next within that category
+  let navCategory: string | undefined;
+  try {
+    const u = new URL(backHref, 'http://local');
+    const c = u.searchParams.get('category');
+    if (c) navCategory = c;
+  } catch {
+    // ignore
+  }
+  const { prev, next } = await getAdjacentPosts(post.id, navCategory);
+
   return (
     <div className="min-h-screen bg-white dark:bg-black">
       <div className="max-w-3xl mx-auto px-6 sm:px-8 py-12 sm:py-16 lg:py-20">
         <header className="mb-12 sm:mb-16">
           <div className="flex justify-between items-start mb-8">
             <Link 
-              href="/" 
+              href={backHref}
               className="text-sm font-light text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-all duration-300 inline-flex items-center gap-1.5 hover:translate-x-[-2px] group"
             >
               <span className="transition-transform duration-300 group-hover:translate-x-[-2px]">←</span>
@@ -83,6 +109,38 @@ export default async function PostPage({
           enableLikes={settings.enableLikes === 'true'}
           enableViews={settings.enableViews === 'true'}
         />
+
+        {(prev || next) && (
+          <nav className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {prev ? (
+                <Link
+                  href={`/posts/${prev.id}?from=${encodeURIComponent(backHref)}`}
+                  className="group p-4 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
+                >
+                  <div className="text-xs text-gray-700 dark:text-gray-300 font-light mb-2">{t.previous}</div>
+                  <div className="text-sm text-black dark:text-white font-light line-clamp-2 group-hover:opacity-80 transition-opacity">
+                    {prev.title}
+                  </div>
+                </Link>
+              ) : (
+                <div />
+              )}
+
+              {next ? (
+                <Link
+                  href={`/posts/${next.id}?from=${encodeURIComponent(backHref)}`}
+                  className="group p-4 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
+                >
+                  <div className="text-xs text-gray-700 dark:text-gray-300 font-light mb-2">{t.next}</div>
+                  <div className="text-sm text-black dark:text-white font-light line-clamp-2 group-hover:opacity-80 transition-opacity">
+                    {next.title}
+                  </div>
+                </Link>
+              ) : null}
+            </div>
+          </nav>
+        )}
       </div>
     </div>
   );

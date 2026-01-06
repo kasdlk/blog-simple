@@ -14,13 +14,17 @@ interface PostStatsProps {
 
 export default function PostStats({
   postId,
-  language,
+  language: _language,
   enableComments,
   enableLikes,
   enableViews,
 }: PostStatsProps) {
   const [stats, setStats] = useState({ likes: 0, comments: 0, views: 0 });
-  const t = getTranslations(language);
+  const t = getTranslations(_language);
+
+  type LikesResp = { count?: number };
+  type CommentsResp = { count?: number };
+  type PostResp = { post?: { views?: number } };
 
   useEffect(() => {
     // Generate or retrieve device ID
@@ -28,7 +32,7 @@ export default function PostStats({
 
     // Load stats
     const loadStats = async () => {
-      const promises: Promise<any>[] = [];
+      const promises: Array<Promise<Partial<typeof stats>>> = [];
 
       if (enableLikes) {
         promises.push(
@@ -36,7 +40,7 @@ export default function PostStats({
             headers: { 'x-device-id': id },
           })
             .then((res) => res.json())
-            .then((data) => ({ likes: data.count || 0 }))
+            .then((data: LikesResp) => ({ likes: data.count || 0 }))
         );
       }
 
@@ -44,7 +48,7 @@ export default function PostStats({
         promises.push(
           fetch(`/api/posts/${postId}/comments`)
             .then((res) => res.json())
-            .then((data) => ({ comments: data.count || 0 }))
+            .then((data: CommentsResp) => ({ comments: data.count || 0 }))
         );
       }
 
@@ -52,7 +56,7 @@ export default function PostStats({
         promises.push(
           fetch(`/api/posts/${postId}`)
             .then((res) => res.json())
-            .then((data) => ({ views: data.post?.views || 0 }))
+            .then((data: PostResp) => ({ views: data.post?.views || 0 }))
         );
       }
 
@@ -70,7 +74,7 @@ export default function PostStats({
   return (
     <div className="flex items-center gap-3 sm:gap-4">
       {enableViews && (
-        <div className="flex items-center gap-1.5 text-xs text-gray-800 dark:text-gray-200">
+        <div className="flex items-center gap-1.5 text-xs text-gray-800 dark:text-gray-200" title={`${t.views}: ${stats.views}`}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -94,7 +98,7 @@ export default function PostStats({
         </div>
       )}
       {enableLikes && (
-        <div className="flex items-center gap-1.5 text-xs text-gray-800 dark:text-gray-200">
+        <div className="flex items-center gap-1.5 text-xs text-gray-800 dark:text-gray-200" title={`${t.likes}: ${stats.likes}`}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -113,7 +117,7 @@ export default function PostStats({
         </div>
       )}
       {enableComments && (
-        <div className="flex items-center gap-1.5 text-xs text-gray-800 dark:text-gray-200">
+        <div className="flex items-center gap-1.5 text-xs text-gray-800 dark:text-gray-200" title={`${t.comments}: ${stats.comments}`}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

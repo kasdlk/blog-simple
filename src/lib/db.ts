@@ -60,7 +60,7 @@ try {
       console.warn('Database integrity check failed:', integrityError);
       try {
         db.close();
-      } catch (closeError) {
+      } catch {
         // Ignore close errors
       }
       
@@ -102,7 +102,8 @@ try {
         `2. 如果是从服务器复制的文件，请使用正确的传输方式（如 scp, rsync）\n` +
         `3. 可以尝试使用 SQLite 工具修复：sqlite3 data/blog.db ".recover" | sqlite3 data/blog.db.new\n` +
         `4. 或者手动删除 data/blog.db 文件，系统将创建新的数据库\n` +
-        `原始错误: ${errorMessage}`
+        `原始错误: ${errorMessage}\n` +
+        `创建新数据库失败: ${createError instanceof Error ? createError.message : String(createError)}`
       );
     }
   } else {

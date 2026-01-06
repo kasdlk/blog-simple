@@ -52,22 +52,25 @@ export default function AdminPage() {
     if (typeof window !== 'undefined') {
       // Force remove antialiased immediately
       const body = document.body;
-      body.classList.remove('antialiased');
-      // 使用 subpixel-antialiased 而不是 auto，这样字体渲染会更接近前台
-      body.style.setProperty('-webkit-font-smoothing', 'subpixel-antialiased', 'important');
-      body.style.setProperty('-moz-osx-font-smoothing', 'auto', 'important');
-      
-      // Also check periodically in case it gets re-added
-      const interval = setInterval(() => {
+      const applyAdminSmoothing = () => {
+        body.classList.remove('antialiased');
+        // 使用 subpixel-antialiased 而不是 auto，这样字体渲染会更接近前台
+        body.style.setProperty('-webkit-font-smoothing', 'subpixel-antialiased', 'important');
+        body.style.setProperty('-moz-osx-font-smoothing', 'auto', 'important');
+      };
+
+      applyAdminSmoothing();
+
+      // 监听 class 变化即可，避免 100ms setInterval 常驻轮询造成 CPU/卡顿
+      const observer = new MutationObserver(() => {
         if (body.classList.contains('antialiased')) {
-          body.classList.remove('antialiased');
-          body.style.setProperty('-webkit-font-smoothing', 'subpixel-antialiased', 'important');
-          body.style.setProperty('-moz-osx-font-smoothing', 'auto', 'important');
+          applyAdminSmoothing();
         }
-      }, 100);
+      });
+      observer.observe(body, { attributes: true, attributeFilter: ['class'] });
       
       return () => {
-        clearInterval(interval);
+        observer.disconnect();
         // Restore on unmount if needed
         body.classList.add('antialiased');
         body.style.removeProperty('-webkit-font-smoothing');
