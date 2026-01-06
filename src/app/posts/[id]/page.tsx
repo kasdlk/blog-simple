@@ -93,7 +93,7 @@ export default async function PostPage({
   return (
     <div className="min-h-screen bg-white dark:bg-black">
       <div className="max-w-3xl mx-auto px-6 sm:px-8 py-12 sm:py-16 lg:py-20">
-        <header className="mb-12 sm:mb-16">
+        <header className="mb-8 sm:mb-10">
           <div className="flex justify-between items-start mb-8">
             <Link 
               href={backHref}

@@ -49,6 +49,15 @@ body {
   line-height: inherit;
 }
 
+/* Markdown：避免首段/末段的默认外边距导致正文与标题区域出现过大空隙 */
+.markdown-content > :first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-content > :last-child {
+  margin-bottom: 0 !important;
+}
+
 /* 隐藏滚动条（保留滚动能力） */
 .hide-scrollbar {
   scrollbar-width: none; /* Firefox */
