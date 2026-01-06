@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPost, updatePost, deletePost } from '@/lib/posts';
-import { validateTitle, validateContent, validateCategory, sanitizeInput } from '@/lib/validation';
+import { validateTitle, validateContent, validateCategory, validateKeywords, sanitizeInput, normalizeKeywords } from '@/lib/validation';
 import { requireAuth } from '@/lib/middleware';
 
 export async function GET(
@@ -36,7 +36,7 @@ export async function PUT(
 
   try {
     const { id } = await params;
-    const { title, content, category } = await request.json();
+    const { title, content, category, keywords } = await request.json();
 
     // Validate inputs
     const titleValidation = validateTitle(title);
@@ -54,15 +54,22 @@ export async function PUT(
       return NextResponse.json({ error: categoryValidation.error }, { status: 400 });
     }
 
+    const keywordsValidation = keywords ? validateKeywords(keywords) : { valid: true };
+    if (!keywordsValidation.valid) {
+      return NextResponse.json({ error: keywordsValidation.error }, { status: 400 });
+    }
+
     // Sanitize inputs
     const sanitizedTitle = sanitizeInput(title);
     const sanitizedContent = sanitizeInput(content);
     const sanitizedCategory = category ? sanitizeInput(category) : '';
+    const sanitizedKeywords = keywords ? normalizeKeywords(keywords) : '';
 
     const updatedPost = await updatePost(id, {
       title: sanitizedTitle,
       content: sanitizedContent,
       category: sanitizedCategory,
+      keywords: sanitizedKeywords,
     });
 
     if (!updatedPost) {

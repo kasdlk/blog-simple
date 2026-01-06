@@ -5,6 +5,7 @@ export const MAX_CONTENT_LENGTH = 50000;
 export const MAX_COMMENT_LENGTH = 2000;
 export const MAX_CATEGORY_LENGTH = 50;
 export const MAX_BIO_LENGTH = 500;
+export const MAX_KEYWORDS_LENGTH = 200;
 
 export interface ValidationResult {
   valid: boolean;
@@ -46,6 +47,41 @@ export function validateCategory(category: string): ValidationResult {
     return { valid: false, error: `Category must be less than ${MAX_CATEGORY_LENGTH} characters` };
   }
   return { valid: true };
+}
+
+export function validateKeywords(keywords: string): ValidationResult {
+  if (typeof keywords !== 'string') {
+    return { valid: false, error: 'Keywords must be a string' };
+  }
+  if (keywords.length > MAX_KEYWORDS_LENGTH) {
+    return { valid: false, error: `Keywords must be less than ${MAX_KEYWORDS_LENGTH} characters` };
+  }
+  return { valid: true };
+}
+
+/**
+ * Normalize keywords input to a stable comma-separated string:
+ * - split by English/Chinese comma and newlines
+ * - trim, de-duplicate
+ * - limit count for sanity
+ */
+export function normalizeKeywords(input: string, maxItems: number = 20): string {
+  const raw = sanitizeInput(input || '');
+  if (!raw) return '';
+  const parts = raw
+    .split(/[,\uFF0C\n]+/g) // , ， \n
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const p of parts) {
+    const key = p.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(p);
+    if (out.length >= maxItems) break;
+  }
+  return out.join(', ');
 }
 
 export function sanitizeInput(input: string): string {

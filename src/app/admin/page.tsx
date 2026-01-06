@@ -24,6 +24,7 @@ interface Post {
   title: string;
   content: string;
   category: string;
+  keywords: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -82,7 +83,7 @@ export default function AdminPage() {
   const [showForm, setShowForm] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
-  const [formData, setFormData] = useState({ title: '', content: '', category: '' });
+  const [formData, setFormData] = useState({ title: '', content: '', category: '', keywords: '' });
   const [settings, setSettings] = useState<Settings>({
     blogTitle: '',
     blogSubtitle: '',
@@ -323,7 +324,7 @@ export default function AdminPage() {
       });
 
       if (res.ok) {
-        setFormData({ title: '', content: '', category: '' });
+        setFormData({ title: '', content: '', category: '', keywords: '' });
         setEditingPost(null);
         setShowForm(false);
         fetchPosts();
@@ -359,7 +360,7 @@ export default function AdminPage() {
 
   const handleEdit = (post: Post) => {
     setEditingPost(post);
-    setFormData({ title: post.title, content: post.content, category: post.category || '' });
+    setFormData({ title: post.title, content: post.content, category: post.category || '', keywords: post.keywords || '' });
     setShowForm(true);
   };
 
@@ -389,7 +390,7 @@ export default function AdminPage() {
   };
 
   const handleCancel = () => {
-    setFormData({ title: '', content: '', category: '' });
+    setFormData({ title: '', content: '', category: '', keywords: '' });
     setEditingPost(null);
     setShowForm(false);
   };
@@ -767,6 +768,18 @@ export default function AdminPage() {
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 focus:border-transparent transition-all duration-300 rounded-md font-light"
                     placeholder={t.category}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-800 dark:text-gray-200 mb-2">
+                    Keywords / 关键词
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.keywords}
+                    onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 focus:border-transparent transition-all duration-300 rounded-md font-light"
+                    placeholder="例如：悖论, 哲学, 逻辑（逗号分隔）"
                   />
                 </div>
                 <div>

@@ -1,12 +1,46 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { getAdjacentPosts, getPost } from '@/lib/posts';
 import { getSettings } from '@/lib/settings';
 import { getTranslations, type Language } from '@/lib/i18n';
+import { extractPlainText } from '@/lib/markdown';
 import Markdown from '@/components/Markdown';
 import Image from 'next/image';
 import ThemeToggle from '@/components/ThemeToggle';
 import PostInteractions from '@/components/PostInteractions';
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ id: string }> }
+): Promise<Metadata> {
+  const { id } = await params;
+  const [post, settings] = await Promise.all([getPost(id), getSettings()]);
+  if (!post) return {};
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3388';
+  const title = post.title || settings.blogTitle || 'Blog';
+  const description = extractPlainText(post.content || '', 160);
+  const keywords = (post.keywords || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const url = `${baseUrl}/posts/${post.id}`;
+
+  return {
+    title,
+    description,
+    keywords: keywords.length > 0 ? keywords : undefined,
+    alternates: { canonical: url },
+    openGraph: {
+      type: 'article',
+      title,
+      description,
+      url,
+      siteName: settings.blogTitle || 'Blog',
+    },
+  };
+}
 
 export default async function PostPage({
   params,

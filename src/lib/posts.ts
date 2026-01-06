@@ -5,6 +5,7 @@ export interface Post {
   title: string;
   content: string;
   category: string;
+  keywords: string;
   views: number;
   createdAt: string;
   updatedAt: string;
@@ -50,9 +51,9 @@ export async function getCategories(): Promise<string[]> {
 export async function searchPosts(query: string, limit: number = 20): Promise<Post[]> {
   const searchQuery = `%${query}%`;
   const stmt = db.prepare(
-    'SELECT * FROM posts WHERE title LIKE ? OR content LIKE ? ORDER BY createdAt DESC LIMIT ?'
+    'SELECT * FROM posts WHERE title LIKE ? OR content LIKE ? OR keywords LIKE ? ORDER BY createdAt DESC LIMIT ?'
   );
-  return stmt.all(searchQuery, searchQuery, limit) as Post[];
+  return stmt.all(searchQuery, searchQuery, searchQuery, limit) as Post[];
 }
 
 export async function getPost(id: string): Promise<Post | null> {
@@ -110,9 +111,9 @@ export async function incrementViews(id: string): Promise<void> {
 export async function createPost(post: Omit<Post, 'id' | 'createdAt' | 'updatedAt' | 'views'>): Promise<Post> {
   const id = Date.now().toString();
   const now = new Date().toISOString();
-  const stmt = db.prepare('INSERT INTO posts (id, title, content, category, views, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)');
-  stmt.run(id, post.title, post.content, post.category || '', 0, now, now);
-  return { id, ...post, category: post.category || '', views: 0, createdAt: now, updatedAt: now };
+  const stmt = db.prepare('INSERT INTO posts (id, title, content, category, keywords, views, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+  stmt.run(id, post.title, post.content, post.category || '', post.keywords || '', 0, now, now);
+  return { id, ...post, category: post.category || '', keywords: post.keywords || '', views: 0, createdAt: now, updatedAt: now };
 }
 
 export async function updatePost(id: string, post: Partial<Omit<Post, 'id' | 'createdAt'>>): Promise<Post | null> {
@@ -120,11 +121,12 @@ export async function updatePost(id: string, post: Partial<Omit<Post, 'id' | 'cr
   if (!existing) return null;
   
   const updatedAt = new Date().toISOString();
-  const stmt = db.prepare('UPDATE posts SET title = ?, content = ?, category = ?, updatedAt = ? WHERE id = ?');
+  const stmt = db.prepare('UPDATE posts SET title = ?, content = ?, category = ?, keywords = ?, updatedAt = ? WHERE id = ?');
   stmt.run(
     post.title ?? existing.title,
     post.content ?? existing.content,
     post.category ?? existing.category,
+    post.keywords ?? existing.keywords ?? '',
     updatedAt,
     id
   );

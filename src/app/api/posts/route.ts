@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllPosts, getPosts, createPost } from '@/lib/posts';
-import { validateTitle, validateContent, validateCategory, sanitizeInput } from '@/lib/validation';
+import { validateTitle, validateContent, validateCategory, validateKeywords, sanitizeInput, normalizeKeywords } from '@/lib/validation';
 import { requireAuth } from '@/lib/middleware';
 
 // GET /api/posts - Get all posts (for admin) or paginated posts (for frontend)
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { title, content, category } = body;
+    const { title, content, category, keywords } = body;
 
     // Validate inputs
     const titleValidation = validateTitle(title);
@@ -59,16 +59,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: categoryValidation.error }, { status: 400 });
     }
 
+    const keywordsValidation = keywords ? validateKeywords(keywords) : { valid: true };
+    if (!keywordsValidation.valid) {
+      return NextResponse.json({ error: keywordsValidation.error }, { status: 400 });
+    }
+
     // Sanitize inputs
     const sanitizedTitle = sanitizeInput(title);
     const sanitizedContent = sanitizeInput(content);
     const sanitizedCategory = category ? sanitizeInput(category) : '';
+    const sanitizedKeywords = keywords ? normalizeKeywords(keywords) : '';
 
     // Create post
     const post = await createPost({
       title: sanitizedTitle,
       content: sanitizedContent,
       category: sanitizedCategory,
+      keywords: sanitizedKeywords,
     });
 
     return NextResponse.json(post, { status: 201 });

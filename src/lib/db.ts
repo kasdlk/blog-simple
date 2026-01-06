@@ -118,6 +118,7 @@ db.exec(`
     title TEXT NOT NULL,
     content TEXT NOT NULL,
     category TEXT DEFAULT '',
+    keywords TEXT DEFAULT '',
     views INTEGER DEFAULT 0,
     createdAt TEXT NOT NULL,
     updatedAt TEXT NOT NULL
@@ -167,6 +168,13 @@ try {
   db.prepare('SELECT views FROM posts LIMIT 1').get();
 } catch {
   db.exec('ALTER TABLE posts ADD COLUMN views INTEGER DEFAULT 0');
+}
+
+// Add keywords column if it doesn't exist (migration)
+try {
+  db.prepare('SELECT keywords FROM posts LIMIT 1').get();
+} catch {
+  db.exec('ALTER TABLE posts ADD COLUMN keywords TEXT DEFAULT ""');
 }
 
 // Add floor and deviceId columns to comments if they don't exist (migration)
