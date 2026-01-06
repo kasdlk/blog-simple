@@ -11,13 +11,21 @@ interface ModalProps {
 
 export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
+    if (!isOpen) return;
+
+    // 与 ConfirmModal 保持一致：锁滚动并补偿滚动条宽度，避免页面“抖动/位移”
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const originalOverflow = document.body.style.overflow;
+    const originalPaddingRight = document.body.style.paddingRight;
+
+    document.body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
     }
+
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = originalOverflow || 'unset';
+      document.body.style.paddingRight = originalPaddingRight || '';
     };
   }, [isOpen]);
 

@@ -118,7 +118,7 @@ export default function SearchBox({ language = 'en' }: SearchBoxProps) {
             className="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 focus:border-transparent transition-all duration-300 rounded-md"
           />
           {isOpen && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-xl rounded-lg overflow-hidden max-h-96 overflow-y-auto z-50 backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-xl rounded-lg overflow-hidden max-h-96 overflow-y-auto hide-scrollbar overscroll-contain z-50 backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95">
               {isSearching ? (
                 <div className="px-4 py-12 text-center">
                   <div className="flex justify-center gap-1.5 mb-3">
