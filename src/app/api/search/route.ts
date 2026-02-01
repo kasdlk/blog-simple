@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchPosts } from '@/lib/posts';
-import { validateSearchQuery } from '@/lib/middleware';
+import { isAuthenticated, validateSearchQuery } from '@/lib/middleware';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: validation.error || 'Invalid search query' }, { status: 400 });
     }
 
-    const posts = await searchPosts(query.trim());
+    const posts = await searchPosts(query.trim(), 20, isAuthenticated(request));
     return NextResponse.json({ posts });
   } catch (error) {
     console.error('Search error:', error);

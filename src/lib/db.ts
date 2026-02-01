@@ -119,6 +119,7 @@ db.exec(`
     content TEXT NOT NULL,
     category TEXT DEFAULT '',
     keywords TEXT DEFAULT '',
+    published INTEGER DEFAULT 1,
     views INTEGER DEFAULT 0,
     createdAt TEXT NOT NULL,
     updatedAt TEXT NOT NULL
@@ -154,6 +155,13 @@ db.exec(`
     createdAt TEXT NOT NULL,
     updatedAt TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS views_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    postId TEXT NOT NULL,
+    createdAt TEXT NOT NULL,
+    FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE
+  );
 `);
 
 // Add category column if it doesn't exist (migration)
@@ -175,6 +183,13 @@ try {
   db.prepare('SELECT keywords FROM posts LIMIT 1').get();
 } catch {
   db.exec('ALTER TABLE posts ADD COLUMN keywords TEXT DEFAULT ""');
+}
+
+// Add published column if it doesn't exist (migration)
+try {
+  db.prepare('SELECT published FROM posts LIMIT 1').get();
+} catch {
+  db.exec('ALTER TABLE posts ADD COLUMN published INTEGER DEFAULT 1');
 }
 
 // Add floor and deviceId columns to comments if they don't exist (migration)

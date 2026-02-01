@@ -25,6 +25,7 @@ interface Post {
   content: string;
   category: string;
   keywords: string;
+  published: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -82,8 +83,9 @@ export default function AdminPage() {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showData, setShowData] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
-  const [formData, setFormData] = useState({ title: '', content: '', category: '', keywords: '' });
+  const [formData, setFormData] = useState({ title: '', content: '', category: '', keywords: '', published: true });
   const [settings, setSettings] = useState<Settings>({
     blogTitle: '',
     blogSubtitle: '',
@@ -111,6 +113,14 @@ export default function AdminPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswordFields, setShowPasswordFields] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const [dataLoading, setDataLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
+  const [stats, setStats] = useState<{ posts: number; views: number; likes: number; comments: number } | null>(null);
+  const [dayStats, setDayStats] = useState<{ date: string; posts: number; views: number; likes: number; comments: number } | null>(null);
+  const [viewsTop, setViewsTop] = useState<Array<{ postId: string; title: string; views: number; latestViewAt: string }>>([]);
+  const [recentComments, setRecentComments] = useState<Array<{ id: string; postId: string; postTitle: string; content: string; floor: number; deviceId: string; createdAt: string }>>([]);
+  const [commentDeleteModal, setCommentDeleteModal] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
   
   const lang = (settings.language || 'en') as Language;
   const t = getTranslations(lang);
@@ -184,6 +194,30 @@ export default function AdminPage() {
       fetchAdminCredentials();
     }
   }, [authenticated, fetchPosts]);
+
+  const fetchDataDashboard = useCallback(async () => {
+    setDataLoading(true);
+    try {
+      const statsRes = await fetch(`/api/admin/stats?date=${encodeURIComponent(selectedDate)}`);
+
+      if (statsRes.ok) {
+        const data = await statsRes.json();
+        setStats(data.overview || null);
+        setDayStats(data.day || null);
+        setViewsTop(data.viewsTop || []);
+        setRecentComments(data.recentComments || []);
+      }
+    } catch (e) {
+      console.error('Failed to load data dashboard:', e);
+    } finally {
+      setDataLoading(false);
+    }
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (!showData) return;
+    fetchDataDashboard();
+  }, [showData, fetchDataDashboard]);
 
   // 进入“新建/编辑”表单时，确保滚动到页面顶部。
   // 用 useLayoutEffect + 非 smooth，避免出现“从底部滑到顶部”的视觉滚动过程。
@@ -345,7 +379,7 @@ export default function AdminPage() {
       });
 
       if (res.ok) {
-        setFormData({ title: '', content: '', category: '', keywords: '' });
+        setFormData({ title: '', content: '', category: '', keywords: '', published: true });
         setEditingPost(null);
         setShowForm(false);
         fetchPosts();
@@ -381,7 +415,7 @@ export default function AdminPage() {
 
   const handleEdit = (post: Post) => {
     setEditingPost(post);
-    setFormData({ title: post.title, content: post.content, category: post.category || '', keywords: post.keywords || '' });
+    setFormData({ title: post.title, content: post.content, category: post.category || '', keywords: post.keywords || '', published: !!post.published });
     setShowForm(true);
   };
 
@@ -411,7 +445,7 @@ export default function AdminPage() {
   };
 
   const handleCancel = () => {
-    setFormData({ title: '', content: '', category: '', keywords: '' });
+    setFormData({ title: '', content: '', category: '', keywords: '', published: true });
     setEditingPost(null);
     setShowForm(false);
   };
@@ -471,20 +505,33 @@ export default function AdminPage() {
               </div>
             </div>
             <div className="flex items-center gap-3 flex-shrink-0">
-              {!showSettings && (
+              {!showSettings && !showData && (
                 <div className="flex-1 min-w-0 max-w-xs">
                   <AdminSearchBox language={lang} onSearch={handleSearch} />
                 </div>
               )}
-              {!showSettings && <ThemeToggle language={lang} />}
+              {!showSettings && !showData && <ThemeToggle language={lang} />}
               <button
                 onClick={() => {
-                  setShowSettings(!showSettings);
+                  const next = !showSettings;
+                  setShowSettings(next);
+                  setShowData(false);
                   setShowForm(false);
                 }}
                 className="px-4 py-2 text-sm font-light border border-gray-300 dark:border-gray-700 text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-900 hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-300 rounded-md active:scale-95"
               >
                 {showSettings ? t.exitSettings : t.settings}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !showData;
+                  setShowData(next);
+                  setShowSettings(false);
+                  setShowForm(false);
+                }}
+                className="px-4 py-2 text-sm font-light border border-gray-300 dark:border-gray-700 text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-900 hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-300 rounded-md active:scale-95"
+              >
+                {showData ? '文章' : '数据'}
               </button>
             </div>
           </div>
@@ -695,6 +742,136 @@ export default function AdminPage() {
               </button>
             </div>
           </form>
+        ) : showData ? (
+          <div className="space-y-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-light text-black dark:text-white">数据总览</h2>
+                <div className="text-xs text-gray-700 dark:text-gray-300 mt-1">当前查看：{selectedDate}</div>
+              </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="px-3 py-2 text-sm font-light border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-black dark:text-white rounded-md"
+                />
+                <button
+                  onClick={fetchDataDashboard}
+                  className="px-4 py-2 text-sm font-light border border-gray-300 dark:border-gray-700 text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-900 transition-all duration-300 rounded-md active:scale-95"
+                >
+                  刷新
+                </button>
+              </div>
+            </div>
+
+            {dataLoading && (
+              <div className="text-sm text-gray-700 dark:text-gray-300">加载中...</div>
+            )}
+
+            {stats && (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { label: '文章', value: stats.posts },
+                  { label: '浏览', value: stats.views },
+                  { label: '点赞', value: stats.likes },
+                  { label: '评论', value: stats.comments },
+                ].map((x) => (
+                  <div
+                    key={x.label}
+                    className="p-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-black"
+                  >
+                    <div className="text-xs text-gray-700 dark:text-gray-300 mb-2">{x.label}（总计）</div>
+                    <div className="text-2xl font-light text-black dark:text-white">{x.value}</div>
+                    {dayStats && (
+                      <div className="text-xs text-gray-700 dark:text-gray-300 mt-2">
+                        当天：{x.label === '文章' ? dayStats.posts : x.label === '浏览' ? dayStats.views : x.label === '点赞' ? dayStats.likes : dayStats.comments}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wide">
+                    最近评论（{selectedDate}）
+                  </h3>
+                </div>
+                <div className="border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
+                  <div className="divide-y divide-gray-200 dark:divide-gray-800">
+                    {recentComments.length === 0 ? (
+                      <div className="p-4 text-sm text-gray-700 dark:text-gray-300">暂无评论</div>
+                    ) : (
+                      recentComments.map((c) => (
+                        <div key={c.id} className="p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <Link
+                                href={`/posts/${c.postId}`}
+                                target="_blank"
+                                className="text-sm text-black dark:text-white hover:underline underline-offset-2"
+                              >
+                                {c.postTitle}
+                              </Link>
+                              <div className="text-xs text-gray-700 dark:text-gray-300 mt-1">
+                                {new Date(c.createdAt).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US')}
+                                {c.floor ? ` · #${c.floor}` : ''}
+                              </div>
+                              <div className="text-sm text-gray-800 dark:text-gray-200 mt-2 line-clamp-2">
+                                {c.content}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => setCommentDeleteModal({ isOpen: true, id: c.id })}
+                              className="text-xs text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                            >
+                              删除
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wide">
+                  浏览排行（{selectedDate}）
+                </h3>
+                <div className="border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
+                  <div className="divide-y divide-gray-200 dark:divide-gray-800">
+                    {viewsTop.length === 0 ? (
+                      <div className="p-4 text-sm text-gray-700 dark:text-gray-300">暂无浏览</div>
+                    ) : (
+                      viewsTop.map((x) => (
+                        <div key={x.postId} className="p-4 flex items-center justify-between gap-3">
+                          <Link
+                            href={`/posts/${x.postId}`}
+                            target="_blank"
+                            className="text-sm text-black dark:text-white hover:underline underline-offset-2 line-clamp-1"
+                            title={x.title}
+                          >
+                            {x.title}
+                          </Link>
+                          <div className="text-xs text-gray-700 dark:text-gray-300 flex-shrink-0 inline-flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            </svg>
+                            <span>{x.views}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         ) : !showForm ? (
           <div>
             <button
@@ -718,9 +895,16 @@ export default function AdminPage() {
                     className="group border-t border-gray-200 dark:border-gray-800 pt-6 sm:pt-8 pb-6 sm:pb-8 first:border-t-0 transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-700"
                   >
                     <div className="flex items-start justify-between mb-3">
-                      <h3 className="text-xl sm:text-2xl font-light text-black dark:text-white transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-80">
-                        {post.title}
-                      </h3>
+                      <div className="min-w-0">
+                        <h3 className="text-xl sm:text-2xl font-light text-black dark:text-white transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-80">
+                          {post.title}
+                        </h3>
+                        {!post.published && (
+                          <span className="inline-block mt-2 text-xs px-2 py-0.5 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">
+                            已下架（前台不展示）
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <p className="text-sm text-gray-800 dark:text-gray-200 mb-4 line-clamp-2 leading-relaxed">
                       {extractPlainText(post.content, 100)}
@@ -741,6 +925,33 @@ export default function AdminPage() {
                         className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-all duration-300 font-light"
                       >
                         {t.edit}
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(`/api/posts/${post.id}`, {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                title: post.title,
+                                content: post.content,
+                                category: post.category || '',
+                                keywords: post.keywords || '',
+                                published: !post.published,
+                              }),
+                            });
+                            if (res.ok) {
+                              const updated = await res.json();
+                              setPosts((prev) => prev.map((p) => (p.id === post.id ? updated : p)));
+                              setFilteredPosts((prev) => prev.map((p) => (p.id === post.id ? updated : p)));
+                            }
+                          } catch (e) {
+                            console.error('Failed to toggle publish:', e);
+                          }
+                        }}
+                        className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-all duration-300 font-light"
+                      >
+                        {post.published ? '下架' : '上架'}
                       </button>
                       <button
                         onClick={() => handleDeleteClick(post.id)}
@@ -809,6 +1020,18 @@ export default function AdminPage() {
                     ))}
                   </datalist>
                 </div>
+                <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-800">
+                  <div>
+                    <div className="text-sm text-black dark:text-white font-light">上架</div>
+                    <div className="text-xs text-gray-700 dark:text-gray-300 mt-1">关闭后前台不展示（下架）</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={formData.published}
+                    onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                </div>
                 <div>
                   <label className="block text-sm text-gray-800 dark:text-gray-200 mb-2">
                     {t.content} <span className="text-xs text-gray-700 dark:text-gray-300">(Markdown supported)</span>
@@ -876,6 +1099,28 @@ export default function AdminPage() {
         title={t.confirmDelete}
         message={t.deleteConfirmMessage}
         confirmText={t.confirm}
+        cancelText={t.cancel}
+      />
+
+      <ConfirmModal
+        isOpen={commentDeleteModal.isOpen}
+        onClose={() => setCommentDeleteModal({ isOpen: false, id: null })}
+        onConfirm={async () => {
+          if (!commentDeleteModal.id) return;
+          try {
+            const res = await fetch(`/api/admin/comments/${commentDeleteModal.id}`, { method: 'DELETE' });
+            if (res.ok) {
+              setRecentComments((prev) => prev.filter((x) => x.id !== commentDeleteModal.id));
+              setStats((prev) => (prev ? { ...prev, comments: Math.max(0, prev.comments - 1) } : prev));
+              setDayStats((prev) => (prev ? { ...prev, comments: Math.max(0, prev.comments - 1) } : prev));
+            }
+          } catch (e) {
+            console.error('Failed to delete comment:', e);
+          }
+        }}
+        title="删除评论"
+        message="确定要删除这条评论吗？"
+        confirmText="删除"
         cancelText={t.cancel}
       />
     </div>

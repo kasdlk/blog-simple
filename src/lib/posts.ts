@@ -6,6 +6,7 @@ export interface Post {
   content: string;
   category: string;
   keywords: string;
+  published: number; // 1 = 上架(前台展示), 0 = 下架(仅后台可见)
   views: number;
   createdAt: string;
   updatedAt: string;
@@ -15,7 +16,8 @@ export async function getPosts(
   category?: string,
   page: number = 1,
   pageSize: number = 10,
-  keyword?: string
+  keyword?: string,
+  includeUnpublished: boolean = false
 ): Promise<{ posts: Post[]; total: number }> {
   // Validate and limit page size
   const safePageSize = Math.min(Math.max(1, pageSize), 50);
@@ -24,6 +26,9 @@ export async function getPosts(
   
   const where: string[] = [];
   const params: unknown[] = [];
+  if (!includeUnpublished) {
+    where.push('published = 1');
+  }
   if (category) {
     where.push('category = ?');
     params.push(category);
@@ -44,27 +49,35 @@ export async function getPosts(
   return { posts, total };
 }
 
-export async function getAllPosts(): Promise<Post[]> {
-  const stmt = db.prepare('SELECT * FROM posts ORDER BY createdAt DESC');
+export async function getAllPosts(includeUnpublished: boolean = true): Promise<Post[]> {
+  const whereClause = includeUnpublished ? '' : 'WHERE published = 1';
+  const stmt = db.prepare(`SELECT * FROM posts ${whereClause} ORDER BY createdAt DESC`);
   return stmt.all() as Post[];
 }
 
 export async function getCategories(): Promise<string[]> {
-  const stmt = db.prepare("SELECT DISTINCT category FROM posts WHERE category != '' AND category IS NOT NULL ORDER BY category");
+  const stmt = db.prepare("SELECT DISTINCT category FROM posts WHERE published = 1 AND category != '' AND category IS NOT NULL ORDER BY category");
   const rows = stmt.all() as Array<{ category: string }>;
   return rows.map(row => row.category);
 }
 
-export async function searchPosts(query: string, limit: number = 20): Promise<Post[]> {
+export async function searchPosts(query: string, limit: number = 20, includeUnpublished: boolean = false): Promise<Post[]> {
   const searchQuery = `%${query}%`;
-  const stmt = db.prepare(
-    'SELECT * FROM posts WHERE title LIKE ? OR content LIKE ? OR keywords LIKE ? ORDER BY createdAt DESC LIMIT ?'
-  );
-  return stmt.all(searchQuery, searchQuery, searchQuery, limit) as Post[];
+  const where: string[] = [];
+  const params: unknown[] = [];
+  if (!includeUnpublished) {
+    where.push('published = 1');
+  }
+  where.push('(title LIKE ? OR content LIKE ? OR keywords LIKE ?)');
+  params.push(searchQuery, searchQuery, searchQuery);
+  const whereClause = `WHERE ${where.join(' AND ')}`;
+  const stmt = db.prepare(`SELECT * FROM posts ${whereClause} ORDER BY createdAt DESC LIMIT ?`);
+  return stmt.all(...params, limit) as Post[];
 }
 
-export async function getPost(id: string): Promise<Post | null> {
-  const stmt = db.prepare('SELECT * FROM posts WHERE id = ?');
+export async function getPost(id: string, includeUnpublished: boolean = false): Promise<Post | null> {
+  const whereClause = includeUnpublished ? 'id = ?' : 'id = ? AND published = 1';
+  const stmt = db.prepare(`SELECT * FROM posts WHERE ${whereClause}`);
   const post = stmt.get(id) as Post | undefined;
   return post || null;
 }
@@ -91,7 +104,7 @@ export async function getAdjacentPosts(postId: string, category?: string): Promi
   const prevStmt = db.prepare(
     `SELECT id, title, category, createdAt
      FROM posts
-     WHERE (createdAt > ? OR (createdAt = ? AND id > ?)) ${baseWhere}
+     WHERE published = 1 AND (createdAt > ? OR (createdAt = ? AND id > ?)) ${baseWhere}
      ORDER BY createdAt ASC, id ASC
      LIMIT 1`
   );
@@ -101,7 +114,7 @@ export async function getAdjacentPosts(postId: string, category?: string): Promi
   const nextStmt = db.prepare(
     `SELECT id, title, category, createdAt
      FROM posts
-     WHERE (createdAt < ? OR (createdAt = ? AND id < ?)) ${baseWhere}
+     WHERE published = 1 AND (createdAt < ? OR (createdAt = ? AND id < ?)) ${baseWhere}
      ORDER BY createdAt DESC, id DESC
      LIMIT 1`
   );
@@ -111,29 +124,39 @@ export async function getAdjacentPosts(postId: string, category?: string): Promi
 }
 
 export async function incrementViews(id: string): Promise<void> {
+  const now = new Date().toISOString();
   const stmt = db.prepare('UPDATE posts SET views = views + 1 WHERE id = ?');
   stmt.run(id);
+
+  // Log view for daily stats (admin dashboard)
+  try {
+    db.prepare('INSERT INTO views_log (postId, createdAt) VALUES (?, ?)').run(id, now);
+  } catch {
+    // ignore if table not present for some reason
+  }
 }
 
 export async function createPost(post: Omit<Post, 'id' | 'createdAt' | 'updatedAt' | 'views'>): Promise<Post> {
   const id = Date.now().toString();
   const now = new Date().toISOString();
-  const stmt = db.prepare('INSERT INTO posts (id, title, content, category, keywords, views, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-  stmt.run(id, post.title, post.content, post.category || '', post.keywords || '', 0, now, now);
-  return { id, ...post, category: post.category || '', keywords: post.keywords || '', views: 0, createdAt: now, updatedAt: now };
+  const stmt = db.prepare('INSERT INTO posts (id, title, content, category, keywords, published, views, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+  const published = typeof post.published === 'number' ? post.published : 1;
+  stmt.run(id, post.title, post.content, post.category || '', post.keywords || '', published, 0, now, now);
+  return { id, ...post, category: post.category || '', keywords: post.keywords || '', published, views: 0, createdAt: now, updatedAt: now };
 }
 
 export async function updatePost(id: string, post: Partial<Omit<Post, 'id' | 'createdAt'>>): Promise<Post | null> {
-  const existing = await getPost(id);
+  const existing = await getPost(id, true);
   if (!existing) return null;
   
   const updatedAt = new Date().toISOString();
-  const stmt = db.prepare('UPDATE posts SET title = ?, content = ?, category = ?, keywords = ?, updatedAt = ? WHERE id = ?');
+  const stmt = db.prepare('UPDATE posts SET title = ?, content = ?, category = ?, keywords = ?, published = ?, updatedAt = ? WHERE id = ?');
   stmt.run(
     post.title ?? existing.title,
     post.content ?? existing.content,
     post.category ?? existing.category,
     post.keywords ?? existing.keywords ?? '',
+    typeof post.published === 'number' ? post.published : existing.published ?? 1,
     updatedAt,
     id
   );

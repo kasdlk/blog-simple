@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const authError = requireAuth(request);
     if (authError) return authError;
     
-    const posts = await getAllPosts();
+    const posts = await getAllPosts(true);
     return NextResponse.json(posts);
   } catch (error) {
     console.error('Failed to fetch posts:', error);
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { title, content, category, keywords } = body;
+    const { title, content, category, keywords, published } = body;
 
     // Validate inputs
     const titleValidation = validateTitle(title);
@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
     const sanitizedContent = sanitizeInput(content);
     const sanitizedCategory = category ? sanitizeInput(category) : '';
     const sanitizedKeywords = keywords ? normalizeKeywords(keywords) : '';
+    const normalizedPublished = published === false ? 0 : 1;
 
     // Create post
     const post = await createPost({
@@ -78,6 +79,7 @@ export async function POST(request: NextRequest) {
       content: sanitizedContent,
       category: sanitizedCategory,
       keywords: sanitizedKeywords,
+      published: normalizedPublished,
     });
 
     return NextResponse.json(post, { status: 201 });

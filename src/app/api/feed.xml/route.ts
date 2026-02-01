@@ -6,7 +6,7 @@ import { extractPlainText } from '@/lib/markdown';
 export async function GET() {
   try {
     const [posts, settings] = await Promise.all([
-      getAllPosts(),
+      getAllPosts(false),
       getSettings(),
     ]);
 

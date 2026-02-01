@@ -15,7 +15,8 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid post ID' }, { status: 400 });
     }
     
-    const post = await getPost(id);
+    // Public: only return published posts
+    const post = await getPost(id, false);
     if (!post) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
@@ -36,7 +37,7 @@ export async function PUT(
 
   try {
     const { id } = await params;
-    const { title, content, category, keywords } = await request.json();
+    const { title, content, category, keywords, published } = await request.json();
 
     // Validate inputs
     const titleValidation = validateTitle(title);
@@ -64,12 +65,14 @@ export async function PUT(
     const sanitizedContent = sanitizeInput(content);
     const sanitizedCategory = category ? sanitizeInput(category) : '';
     const sanitizedKeywords = keywords ? normalizeKeywords(keywords) : '';
+    const normalizedPublished = published === false ? 0 : 1;
 
     const updatedPost = await updatePost(id, {
       title: sanitizedTitle,
       content: sanitizedContent,
       category: sanitizedCategory,
       keywords: sanitizedKeywords,
+      published: normalizedPublished,
     });
 
     if (!updatedPost) {
