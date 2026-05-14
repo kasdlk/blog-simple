@@ -1,4 +1,5 @@
 import db from './db';
+import { escapeSqlLike } from './validation';
 
 export interface Post {
   id: string;
@@ -34,8 +35,8 @@ export async function getPosts(
     params.push(category);
   }
   if (keyword) {
-    where.push('keywords LIKE ?');
-    params.push(`%${keyword}%`);
+    where.push(`keywords LIKE ? ESCAPE '\\'`);
+    params.push(`%${escapeSqlLike(keyword)}%`);
   }
   const whereClause = where.length > 0 ? `WHERE ${where.join(' AND ')}` : '';
 
@@ -62,13 +63,13 @@ export async function getCategories(): Promise<string[]> {
 }
 
 export async function searchPosts(query: string, limit: number = 20, includeUnpublished: boolean = false): Promise<Post[]> {
-  const searchQuery = `%${query}%`;
+  const searchQuery = `%${escapeSqlLike(query)}%`;
   const where: string[] = [];
   const params: unknown[] = [];
   if (!includeUnpublished) {
     where.push('published = 1');
   }
-  where.push('(title LIKE ? OR content LIKE ? OR keywords LIKE ?)');
+  where.push(`(title LIKE ? ESCAPE '\\' OR content LIKE ? ESCAPE '\\' OR keywords LIKE ? ESCAPE '\\')`);
   params.push(searchQuery, searchQuery, searchQuery);
   const whereClause = `WHERE ${where.join(' AND ')}`;
   const stmt = db.prepare(`SELECT * FROM posts ${whereClause} ORDER BY createdAt DESC LIMIT ?`);
@@ -125,8 +126,9 @@ export async function getAdjacentPosts(postId: string, category?: string): Promi
 
 export async function incrementViews(id: string): Promise<void> {
   const now = new Date().toISOString();
-  const stmt = db.prepare('UPDATE posts SET views = views + 1 WHERE id = ?');
-  stmt.run(id);
+  const stmt = db.prepare('UPDATE posts SET views = views + 1 WHERE id = ? AND published = 1');
+  const result = stmt.run(id);
+  if (result.changes === 0) return;
 
   // Log view for daily stats (admin dashboard)
   try {

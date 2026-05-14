@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyToken } from '@/lib/auth';
 
 /**
  * Check if the request is authenticated as admin
  */
 export function isAuthenticated(request: NextRequest): boolean {
   const token = request.cookies.get('admin_token');
-  return !!token;
+  if (!token) {
+    return false;
+  }
+  // Verify the token signature and check expiration
+  const username = verifyToken(token.value);
+  return !!username;
 }
 
 /**

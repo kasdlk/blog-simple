@@ -2,6 +2,9 @@
   "name": "blog",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev -p 3388",
     "build": "next build",
@@ -17,8 +20,7 @@
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
     "rehype-highlight": "^7.0.2",
-    "remark-gfm": "^4.0.1",
-    "sqlite3": "^5.1.7"
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyPassword } from '@/lib/auth';
+import { verifyPassword, generateToken, verifyToken, ADMIN_SESSION_MAX_AGE_SEC } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,8 +15,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
     }
 
-    // Create a simple session token (in production, use JWT or proper session management)
-    const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
+    // Generate a secure signed token
+    const token = generateToken(username);
     
     const response = NextResponse.json({ success: true, token });
     
@@ -25,7 +25,8 @@ export async function POST(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+      maxAge: ADMIN_SESSION_MAX_AGE_SEC,
     });
 
     return response;
@@ -43,8 +44,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ authenticated: false });
     }
 
-    // Simple token validation (in production, use proper JWT validation)
-    return NextResponse.json({ authenticated: true });
+    // Verify token signature and check expiration
+    const username = verifyToken(token.value);
+    return NextResponse.json({ authenticated: !!username });
   } catch {
     return NextResponse.json({ authenticated: false });
   }

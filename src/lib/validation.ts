@@ -84,6 +84,11 @@ export function normalizeKeywords(input: string, maxItems: number = 20): string 
   return out.join(', ');
 }
 
+/** Escape `\\`, `%`, `_` for SQL `LIKE ... ESCAPE '\\'` (SQLite) */
+export function escapeSqlLike(pattern: string): string {
+  return pattern.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+}
+
 export function sanitizeInput(input: string): string {
   if (typeof input !== 'string') {
     return '';
