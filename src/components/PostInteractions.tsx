@@ -10,6 +10,7 @@ interface PostInteractionsProps {
   enableComments: boolean;
   enableLikes: boolean;
   enableViews: boolean;
+  initialViews: number;
 }
 
 interface Comment {
@@ -25,10 +26,11 @@ export default function PostInteractions({
   enableComments,
   enableLikes,
   enableViews,
+  initialViews,
 }: PostInteractionsProps) {
   const [likes, setLikes] = useState({ count: 0, liked: false });
   const [comments, setComments] = useState<Comment[]>([]);
-  const [views, setViews] = useState(0);
+  const [views, setViews] = useState(initialViews);
   const [commentContent, setCommentContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [deviceId, setDeviceId] = useState('');
@@ -47,34 +49,10 @@ export default function PostInteractions({
         fetch(`/api/posts/${postId}/views`, { method: 'POST' })
           .then(() => {
             markPostAsViewed(postId);
+            setViews((current) => current + 1);
           })
           .catch((error) => {
             console.error('Failed to update views:', error);
-          })
-          .finally(() => {
-            // Fetch updated views count regardless of increment success
-            fetch(`/api/posts/${postId}`)
-              .then((res) => res.json())
-              .then((data) => {
-                if (data.post) {
-                  setViews(data.post.views || 0);
-                }
-              })
-              .catch((error) => {
-                console.error('Failed to fetch views:', error);
-              });
-          });
-      } else {
-        // Just fetch current views without incrementing
-        fetch(`/api/posts/${postId}`)
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.post) {
-              setViews(data.post.views || 0);
-            }
-          })
-          .catch((error) => {
-            console.error('Failed to fetch views:', error);
           });
       }
     }
@@ -124,7 +102,7 @@ export default function PostInteractions({
       });
       if (res.ok) {
         const data = await res.json();
-        setComments([...comments, data.comment]);
+        setComments((current) => [...current, data.comment]);
         setCommentContent('');
       } else {
         const error = await res.json();
@@ -327,4 +305,3 @@ export default function PostInteractions({
     </div>
   );
 }
-

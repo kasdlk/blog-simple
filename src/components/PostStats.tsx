@@ -1,72 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { getTranslations, type Language } from '@/lib/i18n';
-import { getOrCreateDeviceId } from '@/lib/utils';
 
 interface PostStatsProps {
-  postId: string;
   language: Language;
   enableComments: boolean;
   enableLikes: boolean;
   enableViews: boolean;
+  stats: {
+    likes: number;
+    comments: number;
+    views: number;
+  };
 }
 
 export default function PostStats({
-  postId,
   language: _language,
   enableComments,
   enableLikes,
   enableViews,
+  stats,
 }: PostStatsProps) {
-  const [stats, setStats] = useState({ likes: 0, comments: 0, views: 0 });
   const t = getTranslations(_language);
-
-  type LikesResp = { count?: number };
-  type CommentsResp = { count?: number };
-  type PostResp = { post?: { views?: number } };
-
-  useEffect(() => {
-    // Generate or retrieve device ID
-    const id = getOrCreateDeviceId();
-
-    // Load stats
-    const loadStats = async () => {
-      const promises: Array<Promise<Partial<typeof stats>>> = [];
-
-      if (enableLikes) {
-        promises.push(
-          fetch(`/api/posts/${postId}/likes`, {
-            headers: { 'x-device-id': id },
-          })
-            .then((res) => res.json())
-            .then((data: LikesResp) => ({ likes: data.count || 0 }))
-        );
-      }
-
-      if (enableComments) {
-        promises.push(
-          fetch(`/api/posts/${postId}/comments`)
-            .then((res) => res.json())
-            .then((data: CommentsResp) => ({ comments: data.count || 0 }))
-        );
-      }
-
-      if (enableViews) {
-        promises.push(
-          fetch(`/api/posts/${postId}`)
-            .then((res) => res.json())
-            .then((data: PostResp) => ({ views: data.post?.views || 0 }))
-        );
-      }
-
-      const results = await Promise.all(promises);
-      const combined = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
-      setStats((prev) => ({ ...prev, ...combined }));
-    };
-
-    loadStats();
-  }, [postId, enableLikes, enableComments, enableViews]);
 
   const hasStats = (enableViews && stats.views > 0) || (enableLikes && stats.likes > 0) || (enableComments && stats.comments > 0);
   if (!hasStats && !enableViews && !enableLikes && !enableComments) return null;
@@ -138,4 +93,3 @@ export default function PostStats({
     </div>
   );
 }
-

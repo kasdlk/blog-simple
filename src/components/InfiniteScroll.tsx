@@ -14,6 +14,9 @@ interface Post {
   content: string;
   category: string;
   keywords?: string;
+  views?: number;
+  likesCount?: number;
+  commentsCount?: number;
   createdAt: string;
   formattedDate?: string; // Server-formatted date to avoid hydration mismatch
 }
@@ -189,11 +192,15 @@ export default function InfiniteScroll({
                 })}
               </time>
               <PostStats
-                postId={post.id}
                 language={language}
                 enableComments={enableComments}
                 enableLikes={enableLikes}
                 enableViews={enableViews}
+                stats={{
+                  views: post.views || 0,
+                  likes: post.likesCount || 0,
+                  comments: post.commentsCount || 0,
+                }}
               />
             </div>
           </article>
@@ -217,4 +224,3 @@ export default function InfiniteScroll({
     </>
   );
 }
-

@@ -165,6 +165,7 @@ export default async function PostPage({
           enableComments={settings.enableComments === 'true'}
           enableLikes={settings.enableLikes === 'true'}
           enableViews={settings.enableViews === 'true'}
+          initialViews={post.views || 0}
         />
 
         {(prev || next) && (
@@ -202,4 +203,3 @@ export default async function PostPage({
     </div>
   );
 }
-

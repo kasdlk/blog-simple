@@ -9,6 +9,8 @@ export interface Post {
   keywords: string;
   published: number; // 1 = 上架(前台展示), 0 = 下架(仅后台可见)
   views: number;
+  likesCount?: number;
+  commentsCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -44,7 +46,16 @@ export async function getPosts(
   const countStmt = db.prepare(`SELECT COUNT(*) as count FROM posts ${whereClause}`);
   const total = (countStmt.get(...params) as { count: number }).count;
 
-  const postsStmt = db.prepare(`SELECT * FROM posts ${whereClause} ORDER BY createdAt DESC LIMIT ? OFFSET ?`);
+  const postsStmt = db.prepare(`
+    SELECT
+      posts.*,
+      (SELECT COUNT(*) FROM likes WHERE likes.postId = posts.id) as likesCount,
+      (SELECT COUNT(*) FROM comments WHERE comments.postId = posts.id) as commentsCount
+    FROM posts
+    ${whereClause}
+    ORDER BY createdAt DESC
+    LIMIT ? OFFSET ?
+  `);
   const posts = postsStmt.all(...params, safePageSize, offset) as Post[];
   
   return { posts, total };
